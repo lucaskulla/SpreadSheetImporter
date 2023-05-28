@@ -76,7 +76,7 @@ export type Columns<T extends string> = Column<T>[]
 export const MatchColumnsStep = <T extends string>({ data, headerValues, onContinue }: MatchColumnsProps<T>) => {
   const toast = useToast()
   const dataExample = data.slice(0, 2)
-  const { autoMapHeaders, autoMapDistance, translations, getFields } = useRsi<T>() // LK: Hier war eigentlich noch fields drin
+  const { autoMapHeaders, autoMapDistance, translations, getFields, addField } = useRsi<T>() // LK: Hier war eigentlich noch fields drin
   const [isLoading, setIsLoading] = useState(false)
   const [columns, setColumns] = useState<Columns<T>>(
     // Do not remove spread, it indexes empty array elements, otherwise map() skips over them
@@ -125,7 +125,7 @@ export const MatchColumnsStep = <T extends string>({ data, headerValues, onConti
 
   useEffect(() => {
     fields = getFields()
-  },[] )
+  }, [])
 
   const onIgnore = useCallback(
     (columnIndex: number) => {
@@ -202,17 +202,17 @@ export const MatchColumnsStep = <T extends string>({ data, headerValues, onConti
     fetchSchema()
   }, [])
 
-  const addMissingFieldsFromHeader = async (fields: Fields<string>, setFieldsFn: (field: Field<string>) => void) => {
+  const addMissingFieldsFromHeader = async (fields: Fields<string>) => {
     const schemaUsed = localStorage.getItem("schemaUsed")
     if (schemaUsed === "true") {
       console.log("User wants to reuse a schema")
       if (convertedSchema === undefined) {
-        console.log("ATTENTION SCHEam is undefined")
+        console.log("Schema is undefined")
       } else {
         for (let i = 0; i < convertedSchema.length; i++) {
           console.log(i)
           if (convertedSchema) {
-            setFieldsFn(convertedSchema[i])
+            addField(convertedSchema[i])
           } else {
             console.log("No schema available - ATTENTION!")
           }
@@ -221,11 +221,10 @@ export const MatchColumnsStep = <T extends string>({ data, headerValues, onConti
       }
     }
   }
-  const rsiInstance = useRsi()
   const [fieldsAdded, setFieldsAdded] = useState(false)
   useEffect(() => {
     if (!fieldsAdded && isSchemaFetched) {
-      addMissingFieldsFromHeader(rsiInstance.getFields(), rsiInstance.addField)
+      addMissingFieldsFromHeader(getFields())
         .then(() => setFieldsAdded(true))
         .catch((error) => console.error("Error adding missing fields:", error))
     }
