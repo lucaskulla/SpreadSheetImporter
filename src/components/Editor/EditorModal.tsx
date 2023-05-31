@@ -17,40 +17,57 @@ import { RawData } from "../../types"
 type EditorModalProps = {
   isOpen: boolean,
   onClose: () => void,
-  data: RawData[]
-}
+  data: RawData[],
+  onSave: (dataEditor: string) => void
+};
 
-const EditorModal = ({ isOpen, onClose, data }: EditorModalProps) => {
+const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
   const [theme, setTheme] = useState("dark")
   let dataAsString = ""
   let dataAsJson = {}
   try {
+
+
     // @ts-ignore
-    dataAsString = JSON.stringify(data["validData"], undefined, 4)
+    if (data["validData"]) {
+      // @ts-ignore
+      dataAsString = JSON.stringify(data["validData"], undefined, 4)
+    } else {
+      // @ts-ignore
+      dataAsString = JSON.stringify(data, undefined, 4)
+    }
+
+
   } catch (e) {
     console.log(e)
   }
-  try {
-    // @ts-ignore
-    dataAsJson = JSON.parse(data)["validData"]
-  } catch (e) {
-    console.log(e)
-  }
+  // try {
+  //   // @ts-ignore
+  //   dataAsJson = JSON.parse(data)["validData"]
+  // } catch (e) {
+  //   console.log(e)
+  // }
 
   const [editor2, setEditor2] = useState(dataAsString || "// You can write your code here...")
   const [editor3, setEditor3] = useState(dataAsString || "// You can write your code here...")
 
   // @ts-ignore
-  const [editor1Value, setEditor1Value] = useState(dataAsString || "// After import of data the data is displayed here")
-  const [editor2Value, setEditor2Value] = useState(" //in the variable data is the data from the left side stored\n \n" +
+  const [editor1Value, setEditor1Value] = useState(
+    dataAsString || "// After import of data the data is displayed here",
+  )
+  const [editor2Value, setEditor2Value] = useState(
+    " //in the variable data is the data from the left side stored\n \n" +
     "function foot(){" +
     "\n " +
     "let dataLeftSide = JSON.parse(data)" +
     "\n" +
     "return JSON.stringify(dataLeftSide, null, 4) " +
-    "\n}")
+    "\n}",
+  )
   const [editor3Value, setEditor3Value] = useState("// The new data is displayed here")
-
+  const [savedData, setSavedData] = useState(
+    dataAsString || "// After import of data the data is displayed here",
+  )
 
   const handleEditor1Change = (value: any, event: any) => {
     setEditor1Value(value)
@@ -80,13 +97,12 @@ const EditorModal = ({ isOpen, onClose, data }: EditorModalProps) => {
         } catch (e) {
           console.log(e)
         }
-
       } else {
         try {
           //result = JSON.parse(result)
           //setEditor3Value(JSON.stringify(result, null, 2))
           setEditor3Value(result)
-
+          setSavedData(result)
         } catch (e) {
           console.log(e)
         }
@@ -96,8 +112,29 @@ const EditorModal = ({ isOpen, onClose, data }: EditorModalProps) => {
     }
   }
 
-
   const editorHeight = "calc(45vh - 10px)" // -20px to account for the gap
+
+  /*  useEffect(() => {
+      setEditor1Value(dataAsString || "// After import of data the data is displayed here")
+      setEditor2Value(
+        "//in the variable data is the data from the left side stored\n\nfunction foot(){" +
+        "\n" +
+        "let dataLeftSide = JSON.parse(data)" +
+        "\n" +
+        "return JSON.stringify(dataLeftSide, null, 4) " +
+        "\n}",
+      )
+      setEditor3Value("// The new data is displayed here")
+      setSavedData(dataAsString || "// After import of data the data is displayed here")
+    }, [dataAsString])*/
+
+  const onSaveAndSetEditor1Value = (dataEditor: string) => {
+    console.log(editor1Value, "editor1Value OLD")
+
+    setEditor1Value(dataEditor)
+    onSave(savedData)
+    console.log(savedData, "editor1Value NEW")
+  }
 
 
   return (
@@ -107,9 +144,12 @@ const EditorModal = ({ isOpen, onClose, data }: EditorModalProps) => {
         <ModalHeader display="flex" justifyContent="space-between" alignItems="center">
           Editor
           <ModalCloseButton />
+          <Button onClick={() =>
+            onSaveAndSetEditor1Value(editor3Value)
+          }>Save</Button>
         </ModalHeader>
         <ModalBody p={0} h="full">
-          <Select placeholder="Select theme" onChange={e => setTheme(e.target.value)}>
+          <Select placeholder="Select theme" onChange={(e) => setTheme(e.target.value)}>
             <option value="light">Light</option>
             <option value="vs-dark">Dark</option>
           </Select>
@@ -121,6 +161,7 @@ const EditorModal = ({ isOpen, onClose, data }: EditorModalProps) => {
                 language={"JSON"}
                 theme={theme}
                 defaultValue={editor1Value || "// You can write your code here..."}
+                value={editor1Value || "// You can write your code here..."}
                 onChange={handleEditor1Change}
                 options={{
                   selectOnLineNumbers: true,
@@ -131,7 +172,6 @@ const EditorModal = ({ isOpen, onClose, data }: EditorModalProps) => {
                 }}
               />
               <div>
-
                 <Editor
                   height={editorHeight}
                   width="100%"
@@ -148,13 +188,16 @@ const EditorModal = ({ isOpen, onClose, data }: EditorModalProps) => {
                   }}
                 />
                 <Box color="white">
-                  <Button onClick={executeCode} size="md"
-                          height="48px"
-                          width="calc(55vh - 0px)"
-                          borderColor="green.500"
-                  >Execute</Button>
+                  <Button
+                    onClick={executeCode}
+                    size="md"
+                    height="48px"
+                    width="calc(55vh - 0px)"
+                    borderColor="green.500"
+                  >
+                    Execute
+                  </Button>
                 </Box>
-
                 <DiffEditor
                   height={editorHeight}
                   width="100%"
@@ -171,8 +214,6 @@ const EditorModal = ({ isOpen, onClose, data }: EditorModalProps) => {
                   }}
                 />
               </div>
-
-
               <Editor
                 height="100%"
                 width="100%"

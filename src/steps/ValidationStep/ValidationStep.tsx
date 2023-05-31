@@ -83,8 +83,23 @@ export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
     setIsAlertOpen(false)
     onClose()
   }
+
+
+  function replaceEmptyWithNaN<T>(data: Data<string>[]): Data<string>[] {
+    return data.map((item: Data<string>) => {
+      for (const key in item) {
+        if (item[key] === "" || item[key] === null || item[key] === undefined) {
+          item[key] = NaN as any
+        }
+      }
+      return item
+    })
+  }
+
+
   const submitData = () => {
     const all = data.map(({ __index, __errors, ...value }) => ({ ...value })) as unknown as Data<T>[]
+    //all = replaceEmptyWithNaN(all)
     const validData = all.filter((value, index) => {
       const originalValue = data[index]
       if (originalValue?.__errors) {
@@ -94,6 +109,9 @@ export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
     })
     const invalidData = all.filter((value) => !validData.includes(value))
     let hasInvalidData = false
+
+    console.log(all, "all")
+    console.log(validData, "validData")
 
     //Only if schema is used, validation step should be executed
     if (localStorage.getItem("schemaUsed") === "true") {

@@ -91,26 +91,8 @@ function processProperty(key: string, property: JSONSchema, defs: JSONSchema, pr
     }
   }
 
-  /*  //ATKUELL NICHT GENUTZT
-  if (property.type === "object" && property.properties) {
-    // Recursively process nested properties
-    for (const nestedKey in property.properties) {
-      if (nestedKey !== key) {
-        // To avoid repeating the same key in the label
-        console.log(nestedKey, "nestedKey", key, "key")
-        processProperty(nestedKey, property.properties[nestedKey], defs, label)
-      } else {
-        console.log(nestedKey, "nestedKey2", key, "key2")
-        processProperty(nestedKey, property.properties[nestedKey], defs)
-      }
-    }
-    return
-  }*/
-
   if (property.type === "array" && property.items) {
     if (property.items.$ref) {
-      //if not not nested items with array would be doubled
-      // Recursively process items in arrays
       processProperty(key, property.items, defs, label)
     } else {
       if (label.includes(key)) {
@@ -155,8 +137,6 @@ function jsonSchemaToFields(schema: JSONSchema): Fields<string> {
     const property = properties[key]
     processProperty(key, property, defs)
   }
-
-  console.log(fieldsList, "fields after processProperty_!_!_!_!_!__!_!_!_!")
 
   localStorage.setItem("fieldsList", JSON.stringify(fieldsList))
 

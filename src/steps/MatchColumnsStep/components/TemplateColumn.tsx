@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react"
 import { useRsi } from "../../../hooks/useRsi"
 import type { Column } from "../MatchColumnsStep"
-import { ColumnType, MatchedSelectColumn, MatchedSelectOptionsColumn } from "../MatchColumnsStep"
+import { ColumnType } from "../MatchColumnsStep"
 import { MatchIcon } from "./MatchIcon"
 import type { Field, Fields } from "../../../types"
 import type { Translations } from "../../../translationsRSIProps"
@@ -88,7 +88,8 @@ export const TemplateColumn = <T extends string>({ column, onChange, onSubChange
     setSelectOption(fields.map(({ label, key }) => ({ value: key, label })))
   }, [fields])
 
-  const addMissingFieldsFromHeader = (fields: Fields<string>, setFieldsFn: (field: Field<string>) => void) => {
+  const addMissingFieldsFromHeader = () => {
+    const fields = getFields()
     const schemaUsed = localStorage.getItem("schemaUsed")
     if (schemaUsed === "false") {
       console.log("ADdMissingFieldsFromHeader")
@@ -132,7 +133,7 @@ export const TemplateColumn = <T extends string>({ column, onChange, onSubChange
             label: header,
             validations: [],
           }
-          setFieldsFn(fieldToAdd)
+          addField(fieldToAdd)
         } else {
           // do nothing, key exists.
         }
@@ -153,7 +154,7 @@ export const TemplateColumn = <T extends string>({ column, onChange, onSubChange
           label: "id",
           validations: [],
         }
-        setFieldsFn(idFieldToAdd)
+        addField(idFieldToAdd)
       }
 
       const allFieldsNew = getFields()
@@ -163,7 +164,7 @@ export const TemplateColumn = <T extends string>({ column, onChange, onSubChange
 
   return (
     <Flex minH={10} w="100%" flexDir="column" justifyContent="center">
-      {(() => addMissingFieldsFromHeader(getFields(), addField))()}
+      {(() => addMissingFieldsFromHeader())()}
       {isIgnored ? (
         <Text sx={styles.selectColumn.text}>{translations.matchColumnsStep.ignoredColumnText}</Text>
       ) : (

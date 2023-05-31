@@ -319,10 +319,10 @@ const ModalAddField: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, isChec
   }
 
   const ValidationEditor = ({
-    index,
-    validation,
-    onChange,
-  }: {
+                              index,
+                              validation,
+                              onChange,
+                            }: {
     index: React.Key | null | undefined
     validation: any
     onChange: (updatedValidation: any) => void
@@ -441,7 +441,7 @@ const ModalAddField: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, isChec
         <Heading {...styles.heading}></Heading>
         <ModalOverlay />
         <ModalContent {...styles.userTable}>
-          <ModalHeader>Add Item Field</ModalHeader>
+          <ModalHeader>Edit or Add a Item Field</ModalHeader>
           <ModalBody>
             <Form
               schema={schemaField}
