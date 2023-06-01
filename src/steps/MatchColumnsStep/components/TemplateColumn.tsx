@@ -92,7 +92,6 @@ export const TemplateColumn = <T extends string>({ column, onChange, onSubChange
     const fields = getFields()
     const schemaUsed = localStorage.getItem("schemaUsed")
     if (schemaUsed === "false") {
-      console.log("ADdMissingFieldsFromHeader")
       const header = column.header
       if (fields === undefined) {
         return null
@@ -123,7 +122,7 @@ export const TemplateColumn = <T extends string>({ column, onChange, onSubChange
           }
 
           const fieldToAdd: Field<string> = {
-            alternateMatches: alterMatches,
+            alternateMatches: ["alterMatches"],
             description: "This field element is automatically generated",
             example: "",
             fieldType: {

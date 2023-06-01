@@ -31,8 +31,6 @@ export const SelectHeaderStep = ({ data, onContinue }: SelectHeaderProps) => {
 
   return (
     <>
-      {console.log(data, "data")}
-      {console.log(selectedRows, "selectedRows")}
       <ModalBody pb={0}>
         <Heading {...styles.heading}>{translations.selectHeaderStep.title}</Heading>
         <Box h={0} flexGrow={1}>

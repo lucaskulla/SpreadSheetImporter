@@ -210,7 +210,6 @@ export const MatchColumnsStep = <T extends string>({ data, headerValues, onConti
         console.log("Schema is undefined")
       } else {
         for (let i = 0; i < convertedSchema.length; i++) {
-          console.log(i)
           if (convertedSchema) {
             addField(convertedSchema[i])
           } else {

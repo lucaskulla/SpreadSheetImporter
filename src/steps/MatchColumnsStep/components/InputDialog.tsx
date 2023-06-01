@@ -72,6 +72,7 @@ const ModalAddField: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, isChec
         },
       },
       fieldType: {
+        default: "input",
         enum: ["checkbox", "select", "input"],
       },
       example: {
@@ -117,7 +118,6 @@ const ModalAddField: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, isChec
 
   const handleSubmit = (data: IChangeEvent<MyFormData, RJSFSchema, any>, event: FormEvent<any>) => {
     const { formData } = data
-
     //This if is needed because officially FieldType is an array, however, in the schema above it is just an enum, because it is easier to display. Here is the array created
     if (formData) {
       if (typeof formData.fieldType === "string") {
@@ -150,26 +150,6 @@ const ModalAddField: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, isChec
     }
   }, [isOpen])
 
-  //Key is a special case. If the key already exists, the field is disabled
-  const ChakraInputKey = (props: { onChange: any; onBlur: any; onFocus: any; value?: "" | undefined }) => {
-    const { onChange, onBlur, onFocus, value = "" } = props
-
-    // Get specific field data based on the current key
-    const currentField = getSpecificField(value)
-
-    return (
-      <>
-        <Input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onBlur={onBlur}
-          onFocus={onFocus}
-          // Disable the field if the key already exists
-          isDisabled={currentField !== undefined}
-        />
-      </>
-    )
-  }
 
   const ChakraInput = (props: { onChange: any; onBlur: any; onFocus: any; value?: "" | undefined }) => {
     const { onChange, onBlur, onFocus, value = "" } = props
@@ -429,7 +409,7 @@ const ModalAddField: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, isChec
       ),
     },
   }
-
+//      {console.log(getSpecificField(column.value), "getSpecificField(column.value)")}
   return (
     <>
       <Modal

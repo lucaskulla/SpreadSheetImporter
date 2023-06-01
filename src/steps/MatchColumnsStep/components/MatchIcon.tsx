@@ -1,7 +1,7 @@
-import { chakra, Box, Flex } from "@chakra-ui/react"
+import { Box, chakra, Flex } from "@chakra-ui/react"
 import { dataAttr } from "@chakra-ui/utils"
 import { motion } from "framer-motion"
-import { CheckCircleIcon } from '@chakra-ui/icons'
+import { CheckCircleIcon } from "@chakra-ui/icons"
 
 
 const MotionFlex = motion(Flex)
@@ -20,10 +20,9 @@ type MatchIconProps = {
 
 export const MatchIcon = (props: MatchIconProps) => {
   //const style = useStyleConfig("MatchIcon", props)
-  console.log("isChecked", props.isChecked)
   return (
     <chakra.div
-     // __css={style}
+      // __css={style}
       minW={6}
       minH={6}
       w={6}
@@ -35,7 +34,7 @@ export const MatchIcon = (props: MatchIconProps) => {
     >
       {props.isChecked && (
         <MotionFlex {...animationConfig}>
-          <CheckCircleIcon w={7} h={7} color="green"  />
+          <CheckCircleIcon w={7} h={7} color="green" />
         </MotionFlex>
       )}
 

@@ -10,7 +10,6 @@ type CSSObjectWithActiveStep = SystemStyleObject & { _activeStep: SystemStyleObj
 const StepsThemeLocal: typeof StepsTheme = {
   ...StepsTheme,
   baseStyle: (props: any) => {
-    console.log("here")
 
     return {
       ...StepsTheme.baseStyle(props),
@@ -26,10 +25,10 @@ const StepsThemeLocal: typeof StepsTheme = {
         ...StepsTheme.baseStyle(props).stepIconContainer,
         bg: "background",
         borderColor: "background",
-         _activeStep: {
-           ...(StepsTheme.baseStyle(props).stepIconContainer! as CSSObjectWithActiveStep),
-           bg: darken(0.0, props.theme.colors.background),
-         },
+        _activeStep: {
+          ...(StepsTheme.baseStyle(props).stepIconContainer! as CSSObjectWithActiveStep),
+          bg: darken(0.0, props.theme.colors.background),
+        },
       },
     }
   },

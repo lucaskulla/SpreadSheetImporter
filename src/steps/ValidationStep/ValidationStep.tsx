@@ -10,9 +10,10 @@ import { SubmitDataAlert } from "../../components/Alerts/SubmitDataAlert"
 import type { Data } from "../../types"
 import type { themeOverrides } from "../../theme"
 import type { RowsChangeData } from "react-data-grid"
-import Ajv from "ajv"
-
 import { DataIsInvalid } from "../../components/Alerts/DataIsInvalidAlert" // Import the DataIsInvalid component
+
+const Ajv2020 = require("ajv/dist/2020")
+
 
 type Props<T extends string> = {
   initialData: Data<T>[]
@@ -98,8 +99,8 @@ export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
 
 
   const submitData = () => {
-    const all = data.map(({ __index, __errors, ...value }) => ({ ...value })) as unknown as Data<T>[]
-    //all = replaceEmptyWithNaN(all)
+    let all = data.map(({ __index, __errors, ...value }) => ({ ...value })) as unknown as Data<T>[]
+    all = replaceEmptyWithNaN(all)
     const validData = all.filter((value, index) => {
       const originalValue = data[index]
       if (originalValue?.__errors) {
@@ -110,15 +111,29 @@ export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
     const invalidData = all.filter((value) => !validData.includes(value))
     let hasInvalidData = false
 
-    console.log(all, "all")
-    console.log(validData, "validData")
-
     //Only if schema is used, validation step should be executed
     if (localStorage.getItem("schemaUsed") === "true") {
-      const ajv = new Ajv()
+
+      const ajv = new Ajv2020()
+
+
       const schema = localStorage.getItem("schemaFromAPI")
+
+
       if (schema) {
-        const validate = ajv.compile(JSON.parse(schema))
+        // @ts-ignore
+        const schemaParsed = JSON.parse(schema)
+
+        // @ts-ignore
+        //ajv.addKeyword(schemaParsed["$schema"])
+        const draft7MetaSchema = require("ajv/dist/refs/json-schema-draft-07.json")
+        ajv.addMetaSchema(draft7MetaSchema)
+
+        ajv.addKeyword("metamodel_version")
+        ajv.addKeyword("version")
+
+
+        const validate = ajv.compile(schemaParsed)
         // Validate data against the schema
 
         for (let i = 0; i < all.length; i++) {

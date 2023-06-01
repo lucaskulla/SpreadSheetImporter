@@ -89,7 +89,6 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
 
       let result = eval(wrappedCode)
 
-      console.log(typeof result, "result type")
       if (typeof result === "function") {
         try {
           result = result(data)
@@ -129,11 +128,8 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
     }, [dataAsString])*/
 
   const onSaveAndSetEditor1Value = (dataEditor: string) => {
-    console.log(editor1Value, "editor1Value OLD")
-
     setEditor1Value(dataEditor)
     onSave(savedData)
-    console.log(savedData, "editor1Value NEW")
   }
 
 

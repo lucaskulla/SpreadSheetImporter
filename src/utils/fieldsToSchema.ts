@@ -41,7 +41,7 @@ function fieldsToJsonSchema(fields: Field<string>[], schemaUsed: boolean): JSONS
     $id: id,
     $schema: "http://json-schema.org/draft-07/schema#",
     additionalProperties: true,
-    metamodel_version: "1.7.0",
+    metamodel_version2: "1.7.0",
     required: ["id"], //ToDO check with Philipp
     version: nextVersion,
   }
@@ -61,7 +61,6 @@ function fieldsToJsonSchema(fields: Field<string>[], schemaUsed: boolean): JSONS
 
         // Add validations
         if (field.validations) {
-          console.log(field.validations, "field.validations")
           for (let i = 0; i < field.validations.length; i++) {
             const validation = field.validations[i]
             if (validation.rule === "required") {

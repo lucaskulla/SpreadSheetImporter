@@ -117,7 +117,6 @@ export const Basic = () => {
   function saveDataFromEditor(dataEditor: string): void {
     const d = JSON.parse(dataEditor)
     setData(d)
-    console.log("data from editor", data)
   }
 
   function removeOldStorage(): void {
