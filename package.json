@@ -12,7 +12,7 @@
     "@chakra-ui/icons": "^2.0.19",
     "@chakra-ui/react": "^2.6.1",
     "@monaco-editor/react": "^4.5.1",
-    "@rjsf/core": "^5.7.2",
+    "@rjsf/core": "^5.7.3",
     "@rjsf/validator-ajv8": "^5.7.2",
     "@types/babel-core": "^6.25.7",
     "axios": "^1.4.0",

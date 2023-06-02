@@ -122,7 +122,7 @@ export const TemplateColumn = <T extends string>({ column, onChange, onSubChange
           }
 
           const fieldToAdd: Field<string> = {
-            alternateMatches: ["alterMatches"],
+            alternateMatches: alterMatches,
             description: "This field element is automatically generated",
             example: "",
             fieldType: {

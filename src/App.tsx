@@ -19,7 +19,9 @@ import { saveAs } from "file-saver"
 import fieldsToJsonSchema from "./utils/fieldsToSchema"
 import apiClient from "./api/apiClient"
 import EditorModal from "./components/Editor/EditorModal"
-import { JSONSchema6 } from "json-schema"
+import { JSONSchema6, JSONSchema7 } from "json-schema"
+import EditorJsonSchema from "./components/Editor/EditorJsonSchema"
+
 
 export const Basic = () => {
   const [data, setData] = useState<any>(null)
@@ -27,6 +29,9 @@ export const Basic = () => {
   const { isOpen: isEditorOpen, onOpen: onOpenEditor, onClose: onCloseEditor } = useDisclosure()
   const [showPreview, setShowPreview] = useState(false)
   const [previewSchema, setPreviewSchema] = useState<JSONSchema6>()
+
+  const [isOpenJsonEditor, setIsOpenJsonEditor] = useState(false)
+  const [schemaRender, setSchemaRender] = useState(false)
 
   const toast = useToast()
 
@@ -88,14 +93,16 @@ export const Basic = () => {
   )
 
   useEffect(() => {
-    const fields = localStorage.getItem("fieldsList")
-    const schemaUsedStorage = localStorage.getItem("schemaUsed")
-    const schemaUsed: boolean = schemaUsedStorage ? schemaUsedStorage === "true" : false
-    if (fields) {
-      const conversion = fieldsToJsonSchema(JSON.parse(fields), schemaUsed)
-      setPreviewSchema(conversion)
+    if (schemaRender) {
+      const fields = localStorage.getItem("fieldsList")
+      const schemaUsedStorage = localStorage.getItem("schemaUsed")
+      const schemaUsed: boolean = schemaUsedStorage ? schemaUsedStorage === "true" : false
+      if (fields) {
+        const conversion = fieldsToJsonSchema(JSON.parse(fields), schemaUsed)
+        setPreviewSchema(conversion)
+      }
     }
-  }, [])
+  }, [schemaRender])
 
   function uploadNewSchemaToAPI(): void {
     const fields = localStorage.getItem("fieldsList")
@@ -131,6 +138,10 @@ export const Basic = () => {
     localStorage.setItem("schemaUsed", "false")
   }
 
+  function handlePreviewButtonClick(): void {
+    setSchemaRender(true)
+    setShowPreview(!showPreview)
+  }
 
   return (
     <>
@@ -166,7 +177,8 @@ export const Basic = () => {
                 <ModalCloseButton />
               </ModalHeader>
               <ModalBody>
-                <EditorModal isOpen={isEditorOpen} onClose={onCloseEditor} data={data} onSave={saveDataFromEditor} />
+                <EditorModal isOpen={isEditorOpen} onClose={onCloseEditor} data={data} onSave={saveDataFromEditor}
+                />
                 {data && (
                   <Box marginTop="10px">
                   </Box>
@@ -217,7 +229,7 @@ export const Basic = () => {
               Download Invalid Data
             </Button>
             <Button
-              onClick={() => setShowPreview(!showPreview)}
+              onClick={() => handlePreviewButtonClick()}
               bg="blue.500"
               color="black"
               p="8px"
@@ -227,6 +239,18 @@ export const Basic = () => {
               _active={{ bg: "blue.700" }}
             >
               {showPreview ? "Hide Schema Preview" : "Show Schema Preview"}
+            </Button>
+            <Button
+              onClick={() => setIsOpenJsonEditor(!isOpenJsonEditor)}
+              bg="blue.500"
+              color="black"
+              p="8px"
+              border="2px solid #718096"
+              borderRadius="8px"
+              _hover={{ bg: "blue.600" }}
+              _active={{ bg: "blue.700" }}
+            >
+              Edit Schema
             </Button>
             <Button
               onClick={uploadDataToAPI}
@@ -240,24 +264,24 @@ export const Basic = () => {
             >
               Upload Data to API
             </Button>
-            <Button
-              onClick={uploadNewSchemaToAPI}
-              bg="blue.500"
-              color="black"
-              p="8px"
-              border="2px solid #718096"
-              borderRadius="8px"
-              _hover={{ bg: "blue.600" }}
-              _active={{ bg: "blue.700" }}
-            >
-              Upload new Schema to API
-            </Button>
+            <Box py={20} display="flex" gap="8px" alignItems="center">
+              <Button
+                onClick={uploadNewSchemaToAPI}
+                border="2px solid #7069FA"
+                p="8px"
+                borderRadius="8px"
+              >
+                Upload Schema to API
+              </Button>
+            </Box>
           </Box>
         </Box>
       )}
 
       <ReactSpreadsheetImport {...mockRsiValues} isOpen={isOpen} onClose={onClose} onSubmit={setData} />
 
+      <EditorJsonSchema isOpen={isOpenJsonEditor} onClose={console.log} jsonSchema={previewSchema as JSONSchema7}
+                        onSave={console.log}></EditorJsonSchema>
       {showPreview && previewSchema && (
         <Box pt={64} display="flex" gap="8px" flexDirection="column">
           <b>Schema:</b>

@@ -14,6 +14,7 @@ import {
 import Editor, { DiffEditor } from "@monaco-editor/react"
 import { RawData } from "../../types"
 
+
 type EditorModalProps = {
   isOpen: boolean,
   onClose: () => void,
@@ -22,6 +23,7 @@ type EditorModalProps = {
 };
 
 const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
+
   const [theme, setTheme] = useState("dark")
   let dataAsString = ""
   let dataAsJson = {}
@@ -113,23 +115,14 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
 
   const editorHeight = "calc(45vh - 10px)" // -20px to account for the gap
 
-  /*  useEffect(() => {
-      setEditor1Value(dataAsString || "// After import of data the data is displayed here")
-      setEditor2Value(
-        "//in the variable data is the data from the left side stored\n\nfunction foot(){" +
-        "\n" +
-        "let dataLeftSide = JSON.parse(data)" +
-        "\n" +
-        "return JSON.stringify(dataLeftSide, null, 4) " +
-        "\n}",
-      )
-      setEditor3Value("// The new data is displayed here")
-      setSavedData(dataAsString || "// After import of data the data is displayed here")
-    }, [dataAsString])*/
+  const [jsonSchemaEditorOpen, setJsonSchemaEditorOpen] = useState(false)
 
-  const onSaveAndSetEditor1Value = (dataEditor: string) => {
-    setEditor1Value(dataEditor)
-    onSave(savedData)
+
+  const onSaveAndSetEditor1Value = (dataEditorSchema: any) => {
+    setEditor1Value(dataEditorSchema)
+
+
+    onSave(dataEditorSchema)
   }
 
 
@@ -143,6 +136,9 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
           <Button onClick={() =>
             onSaveAndSetEditor1Value(editor3Value)
           }>Save</Button>
+          <Button onClick={() =>
+            setJsonSchemaEditorOpen(true)
+          }>OpenEditorJson</Button>
         </ModalHeader>
         <ModalBody p={0} h="full">
           <Select placeholder="Select theme" onChange={(e) => setTheme(e.target.value)}>
@@ -231,6 +227,7 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
         </ModalBody>
       </ModalContent>
     </Modal>
+
   )
 }
 

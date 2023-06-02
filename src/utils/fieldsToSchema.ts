@@ -12,6 +12,8 @@ function incrementVersion(version: string): string {
 }
 
 function fieldsToJsonSchema(fields: Field<string>[], schemaUsed: boolean): JSONSchema {
+  console.log("fieldsToJsonSchema")
+  console.log(fields, schemaUsed)
   let nextVersion = undefined
   let id = undefined
   if (schemaUsed) {

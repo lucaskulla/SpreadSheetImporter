@@ -104,6 +104,7 @@ export const Basic = () => {
 
   useEffect(() => {
     const fields = localStorage.getItem("fieldsList")
+    console.log(fields, "fields")
     const schemaUsedStorage = localStorage.getItem("schemaUsed")
     const schemaUsed: boolean = schemaUsedStorage ? schemaUsedStorage === "true" : false
     if (fields) {
@@ -269,7 +270,8 @@ export const Basic = () => {
             color="white"
             p={32}
           >
-            <pre>{JSON.stringify(previewSchema, undefined, 4)}</pre>{" "}
+            <pre>{JSON.stringify(previewSchema, undefined, 4)}</pre>
+            {" "}
           </Code>
         </Box>
       )}
