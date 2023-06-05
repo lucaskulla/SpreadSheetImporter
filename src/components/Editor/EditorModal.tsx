@@ -14,49 +14,30 @@ import {
 import Editor, { DiffEditor } from "@monaco-editor/react"
 import { RawData } from "../../types"
 
-
 type EditorModalProps = {
-  isOpen: boolean,
-  onClose: () => void,
-  data: RawData[],
-  onSave: (dataEditor: string) => void
+  isOpen: boolean;
+  onClose: () => void;
+  data: RawData[];
+  onSave: (dataEditor: string, changesInKeys: any) => void;
 };
 
 const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
-
+  const originalData = data
   const [theme, setTheme] = useState("dark")
   let dataAsString = ""
-  let dataAsJson = {}
   try {
-
-
     // @ts-ignore
     if (data["validData"]) {
       // @ts-ignore
       dataAsString = JSON.stringify(data["validData"], undefined, 4)
     } else {
-      // @ts-ignore
       dataAsString = JSON.stringify(data, undefined, 4)
     }
-
-
   } catch (e) {
     console.log(e)
   }
-  // try {
-  //   // @ts-ignore
-  //   dataAsJson = JSON.parse(data)["validData"]
-  // } catch (e) {
-  //   console.log(e)
-  // }
 
-  const [editor2, setEditor2] = useState(dataAsString || "// You can write your code here...")
-  const [editor3, setEditor3] = useState(dataAsString || "// You can write your code here...")
-
-  // @ts-ignore
-  const [editor1Value, setEditor1Value] = useState(
-    dataAsString || "// After import of data the data is displayed here",
-  )
+  const [editor1Value, setEditor1Value] = useState(dataAsString || "// After import of data the data is displayed here")
   const [editor2Value, setEditor2Value] = useState(
     " //in the variable data is the data from the left side stored\n \n" +
     "function foot(){" +
@@ -67,28 +48,15 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
     "\n}",
   )
   const [editor3Value, setEditor3Value] = useState("// The new data is displayed here")
-  const [savedData, setSavedData] = useState(
-    dataAsString || "// After import of data the data is displayed here",
-  )
 
-  const handleEditor1Change = (value: any, event: any) => {
+  const handleEditor1Change = (value: any) => {
     setEditor1Value(value)
-  }
-
-  const handleEditor2Change = (value: any, event: any) => {
-    setEditor2Value(value)
-  }
-
-  const handleEditor3Change = (value: any, event: any) => {
-    setEditor3Value(value)
   }
 
   const executeCode = () => {
     try {
       const data = dataAsString
-      // Add an IIFE wrapper to the user's function that provides data
       const wrappedCode = `(${editor2Value})();`
-
       let result = eval(wrappedCode)
 
       if (typeof result === "function") {
@@ -100,10 +68,7 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
         }
       } else {
         try {
-          //result = JSON.parse(result)
-          //setEditor3Value(JSON.stringify(result, null, 2))
           setEditor3Value(result)
-          setSavedData(result)
         } catch (e) {
           console.log(e)
         }
@@ -115,14 +80,43 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
 
   const editorHeight = "calc(45vh - 10px)" // -20px to account for the gap
 
-  const [jsonSchemaEditorOpen, setJsonSchemaEditorOpen] = useState(false)
+
+  function checkWhichPropertiesAdded(modified: string) {
+
+    const originalJSON = data
+    const modifiedJSON = JSON.parse(modified)
+
+    let originalKeys: string[] = []
+    let modifiedKeys: string[] = []
+
+    try {
+      originalKeys = Object.keys(originalJSON[0])
+    } catch (e) {
+      console.log(e)
+    }
+
+    try {
+      modifiedKeys = Object.keys(modifiedJSON[0])
+    } catch (e) {
+      console.log(e)
+    }
 
 
-  const onSaveAndSetEditor1Value = (dataEditorSchema: any) => {
-    setEditor1Value(dataEditorSchema)
-    onSave(dataEditorSchema)
+    const keysOnlyInOriginal = originalKeys.filter((key) => !modifiedKeys.includes(key))
+    const keysOnlyInModified = modifiedKeys.filter((key) => !originalKeys.includes(key))
+
+
+    return ["keysOnlyInOriginal", keysOnlyInOriginal, "keysOnlyInModified", keysOnlyInModified]
+
+
   }
 
+
+  const onSaveAndSetEditor1Value = (dataEditorSchema: string) => {
+    const changesInKeys = checkWhichPropertiesAdded(dataEditorSchema)
+    setEditor1Value(dataEditorSchema)
+    onSave(dataEditorSchema, changesInKeys)
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} motionPreset="slideInBottom" size="full" isCentered={false}>
@@ -131,9 +125,7 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
         <ModalHeader display="flex" justifyContent="space-between" alignItems="center">
           Editor
           <ModalCloseButton />
-          <Button onClick={() =>
-            onSaveAndSetEditor1Value(editor3Value)
-          }>Save</Button>
+          <Button onClick={() => onSaveAndSetEditor1Value(editor3Value)}>Save</Button>
         </ModalHeader>
         <ModalBody p={0} h="full">
           <Select placeholder="Select theme" onChange={(e) => setTheme(e.target.value)}>
@@ -165,7 +157,7 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
                   language={"JavaScript"}
                   theme={theme}
                   defaultValue={editor2Value || "no file selected"}
-                  onChange={handleEditor2Change}
+                  onChange={(value: any) => setEditor2Value(value)}
                   options={{
                     selectOnLineNumbers: true,
                     roundedSelection: false,
@@ -175,13 +167,8 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
                   }}
                 />
                 <Box color="white">
-                  <Button
-                    onClick={executeCode}
-                    size="md"
-                    height="48px"
-                    width="calc(55vh - 0px)"
-                    borderColor="green.500"
-                  >
+                  <Button onClick={executeCode} size="md" height="48px" width="calc(55vh - 0px)"
+                          borderColor="green.500">
                     Execute
                   </Button>
                 </Box>
@@ -208,7 +195,6 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
                 theme={theme}
                 defaultValue={editor3Value}
                 value={editor3Value}
-                //onChange={handleEditor3Change}
                 options={{
                   selectOnLineNumbers: true,
                   roundedSelection: false,
@@ -222,7 +208,6 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
         </ModalBody>
       </ModalContent>
     </Modal>
-
   )
 }
 

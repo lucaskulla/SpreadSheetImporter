@@ -38,10 +38,12 @@ const EditorModalJSONSchema = ({ isOpen, onClose, onSave }: EditorModalProps) =>
     const schemaUsedStorage = localStorage.getItem("schemaUsed")
     const schemaUsed: boolean = schemaUsedStorage ? schemaUsedStorage === "true" : false
     if (fields) {
+      console.log("fields", JSON.parse(fields))
+      console.log("DAFAS")
       const conversion = fieldsToJsonSchema(JSON.parse(fields), schemaUsed)
       setEditor1Value(JSON.stringify(conversion, null, 4))
     }
-  }, [])
+  }, [theme])
 
 
   function handleEditorValidation(markers: any[]) {

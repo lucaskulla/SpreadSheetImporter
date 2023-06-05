@@ -15,6 +15,7 @@ import {
 import { mockRsiValues } from "./stories/mockRsiValues"
 import React, { useCallback, useEffect, useState } from "react"
 import type { Data } from "./types"
+import { Field } from "./types"
 import { saveAs } from "file-saver"
 import fieldsToJsonSchema from "./utils/fieldsToSchema"
 import apiClient from "./api/apiClient"
@@ -129,9 +130,60 @@ export const Basic = () => {
     }
   }
 
-  function saveDataFromEditor(dataEditor: string): void {
-    const d = JSON.parse(dataEditor)
-    setData(d)
+  function saveDataFromEditor(dataEditor: string, changesInKeys: any): void {
+    const dataAsJSON = JSON.parse(dataEditor)
+    setData(dataAsJSON)
+
+    const changesKeyInOriginal = changesInKeys[1] //means that properties has been removed
+    const changesKeyInNew = changesInKeys[3] //means that properties has been added
+
+    console.log(changesKeyInOriginal, "changesKeyInOriginal")
+    console.log(changesKeyInNew, "changesKeyInNew")
+
+    if (changesKeyInOriginal.length > 0) {
+      const fields = localStorage.getItem("fieldsList")
+      if (fields) {
+        const fieldsAsJSON = JSON.parse(fields)
+        changesKeyInOriginal.forEach((key: string) => {
+          delete fieldsAsJSON[key]
+        })
+        localStorage.setItem("fieldsList", JSON.stringify(fieldsAsJSON))
+      }
+    }
+
+    if (changesKeyInNew.length > 0) {
+      console.log("Here")
+      const fields = localStorage.getItem("fieldsList")
+      if (fields) {
+        const fieldsAsJSON = JSON.parse(fields)
+        changesKeyInNew.forEach((key: string) => {
+          console.log(key, "key")
+
+
+          const fieldToAdd: Field<string> = {
+            alternateMatches: [key],
+            description: "This field element is automatically generated after changes in the data",
+            example: "",
+            fieldType: {
+              type: "input",
+            },
+            key: key,
+            label: key,
+            validations: [],
+          }
+          const size = fieldsAsJSON.length
+          fieldsAsJSON[size] = fieldToAdd
+
+
+        })
+        console.log(fieldsAsJSON, "fieldsAsJSON")
+        localStorage.removeItem("fieldsList")
+        localStorage.setItem("fieldsList", JSON.stringify(fieldsAsJSON))
+
+      }
+    }
+
+
   }
 
   function removeOldStorage(): void {
