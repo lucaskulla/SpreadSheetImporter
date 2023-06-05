@@ -19,8 +19,8 @@ import { saveAs } from "file-saver"
 import fieldsToJsonSchema from "./utils/fieldsToSchema"
 import apiClient from "./api/apiClient"
 import EditorModal from "./components/Editor/EditorModal"
-import { JSONSchema6, JSONSchema7 } from "json-schema"
-import EditorJsonSchema from "./components/Editor/EditorJsonSchema"
+import { JSONSchema6 } from "json-schema"
+import EditorModalJSONSchema from "./components/Editor/EditorJsonSchema"
 
 
 export const Basic = () => {
@@ -35,6 +35,13 @@ export const Basic = () => {
 
   const toast = useToast()
 
+  const [editor1Value, setEditor1Value] = useState("// After import of data the data is displayed here")
+
+  const handleEditor1Change = (value: string) => {
+    const valueAsJSON = JSON.parse(value)
+    console.log(valueAsJSON)
+    setEditor1Value(valueAsJSON)
+  }
 
   function convertToCSV(data: Data<string>[]): string {
     const header = Object.keys(data[0]).join(",")
@@ -100,6 +107,7 @@ export const Basic = () => {
       if (fields) {
         const conversion = fieldsToJsonSchema(JSON.parse(fields), schemaUsed)
         setPreviewSchema(conversion)
+        setEditor1Value(JSON.stringify(conversion, null, 4))
       }
     }
   }, [schemaRender])
@@ -163,12 +171,30 @@ export const Basic = () => {
         <Box py={20} display="flex" gap="8px" alignItems="center">
           <Button
             onClick={onOpenEditor}
-            border="2px solid #7069FA"
+            bg="blue.500"
             p="8px"
+            border="2px solid #718096"
             borderRadius="8px"
+            _hover={{ bg: "blue.600" }}
+            _active={{ bg: "blue.700" }}
           >
-            Open Editor
+            Edit Data
           </Button>
+
+          <Button
+            onClick={() => setIsOpenJsonEditor(!isOpenJsonEditor)}
+            bg="blue.500"
+            p="8px"
+            border="2px solid #718096"
+            borderRadius="8px"
+            _hover={{ bg: "blue.600" }}
+            _active={{ bg: "blue.700" }}
+          >
+            Edit Schema
+          </Button>
+
+          <EditorModalJSONSchema isOpen={isOpenJsonEditor} onClose={() => setIsOpenJsonEditor(false)}
+                                 onSave={handleEditor1Change} />
           <Modal isOpen={isEditorOpen} onClose={onCloseEditor} motionPreset="slideInBottom">
             <ModalOverlay style={{ backdropFilter: "blur(5px)", backgroundColor: "rgba(0, 0, 0, 0.4)" }} />
             <ModalContent>
@@ -240,18 +266,7 @@ export const Basic = () => {
             >
               {showPreview ? "Hide Schema Preview" : "Show Schema Preview"}
             </Button>
-            <Button
-              onClick={() => setIsOpenJsonEditor(!isOpenJsonEditor)}
-              bg="blue.500"
-              color="black"
-              p="8px"
-              border="2px solid #718096"
-              borderRadius="8px"
-              _hover={{ bg: "blue.600" }}
-              _active={{ bg: "blue.700" }}
-            >
-              Edit Schema
-            </Button>
+
             <Button
               onClick={uploadDataToAPI}
               bg="blue.500"
@@ -267,9 +282,12 @@ export const Basic = () => {
             <Box py={20} display="flex" gap="8px" alignItems="center">
               <Button
                 onClick={uploadNewSchemaToAPI}
-                border="2px solid #7069FA"
+                bg="blue.500"
                 p="8px"
+                border="2px solid #718096"
                 borderRadius="8px"
+                _hover={{ bg: "blue.600" }}
+                _active={{ bg: "blue.700" }}
               >
                 Upload Schema to API
               </Button>
@@ -280,8 +298,7 @@ export const Basic = () => {
 
       <ReactSpreadsheetImport {...mockRsiValues} isOpen={isOpen} onClose={onClose} onSubmit={setData} />
 
-      <EditorJsonSchema isOpen={isOpenJsonEditor} onClose={console.log} jsonSchema={previewSchema as JSONSchema7}
-                        onSave={console.log}></EditorJsonSchema>
+
       {showPreview && previewSchema && (
         <Box pt={64} display="flex" gap="8px" flexDirection="column">
           <b>Schema:</b>

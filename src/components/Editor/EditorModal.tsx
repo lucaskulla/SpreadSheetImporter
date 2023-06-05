@@ -120,8 +120,6 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
 
   const onSaveAndSetEditor1Value = (dataEditorSchema: any) => {
     setEditor1Value(dataEditorSchema)
-
-
     onSave(dataEditorSchema)
   }
 
@@ -136,9 +134,6 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
           <Button onClick={() =>
             onSaveAndSetEditor1Value(editor3Value)
           }>Save</Button>
-          <Button onClick={() =>
-            setJsonSchemaEditorOpen(true)
-          }>OpenEditorJson</Button>
         </ModalHeader>
         <ModalBody p={0} h="full">
           <Select placeholder="Select theme" onChange={(e) => setTheme(e.target.value)}>
