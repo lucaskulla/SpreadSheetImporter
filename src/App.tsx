@@ -130,36 +130,28 @@ export const Basic = () => {
     }
   }
 
+
   function saveDataFromEditor(dataEditor: string, changesInKeys: any): void {
     const dataAsJSON = JSON.parse(dataEditor)
     setData(dataAsJSON)
 
-    const changesKeyInOriginal = changesInKeys[1] //means that properties has been removed
-    const changesKeyInNew = changesInKeys[3] //means that properties has been added
+    const fieldsList = localStorage.getItem("fieldsList")
+    if (!fieldsList) return
 
-    console.log(changesKeyInOriginal, "changesKeyInOriginal")
-    console.log(changesKeyInNew, "changesKeyInNew")
+    let fieldsAsJSON = JSON.parse(fieldsList)
+
+    const changesKeyInOriginal = changesInKeys[1]
+    const changesKeyInNew = changesInKeys[3]
 
     if (changesKeyInOriginal.length > 0) {
-      const fields = localStorage.getItem("fieldsList")
-      if (fields) {
-        const fieldsAsJSON = JSON.parse(fields)
-        changesKeyInOriginal.forEach((key: string) => {
-          delete fieldsAsJSON[key]
-        })
-        localStorage.setItem("fieldsList", JSON.stringify(fieldsAsJSON))
-      }
+      fieldsAsJSON = fieldsAsJSON.filter((jsonObject: any) => !changesKeyInOriginal.includes(jsonObject.key))
     }
 
     if (changesKeyInNew.length > 0) {
-      console.log("Here")
-      const fields = localStorage.getItem("fieldsList")
-      if (fields) {
-        const fieldsAsJSON = JSON.parse(fields)
-        changesKeyInNew.forEach((key: string) => {
-          console.log(key, "key")
-
-
+      changesKeyInNew.forEach((key: string) => {
+        if (fieldsAsJSON.find((field: any) => field.key === key)) {
+          console.log("Field already exists")
+        } else {
           const fieldToAdd: Field<string> = {
             alternateMatches: [key],
             description: "This field element is automatically generated after changes in the data",
@@ -171,20 +163,15 @@ export const Basic = () => {
             label: key,
             validations: [],
           }
-          const size = fieldsAsJSON.length
-          fieldsAsJSON[size] = fieldToAdd
-
-
-        })
-        console.log(fieldsAsJSON, "fieldsAsJSON")
-        localStorage.removeItem("fieldsList")
-        localStorage.setItem("fieldsList", JSON.stringify(fieldsAsJSON))
-
-      }
+          fieldsAsJSON.push(fieldToAdd)
+        }
+      })
     }
 
-
+    localStorage.removeItem("fieldsList")
+    localStorage.setItem("fieldsList", JSON.stringify(fieldsAsJSON))
   }
+
 
   function removeOldStorage(): void {
     localStorage.removeItem("fieldsList")

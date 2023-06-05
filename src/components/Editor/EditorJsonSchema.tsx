@@ -9,7 +9,7 @@ import {
   ModalOverlay,
   Select,
 } from "@chakra-ui/react"
-import React, { useEffect, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import Editor from "@monaco-editor/react"
 import fieldsToJsonSchema from "../../utils/fieldsToSchema"
 
@@ -19,41 +19,43 @@ type EditorModalProps = {
   onSave: (dataEditor: string) => void;
 };
 
+const THEMES = {
+  light: "light",
+  dark: "vs-dark",
+}
+
 const EditorModalJSONSchema = ({ isOpen, onClose, onSave }: EditorModalProps) => {
   const [editor1Value, setEditor1Value] = useState("No schema avaiable")
-  const [theme, setTheme] = useState("dark")
+  const [theme, setTheme] = useState(THEMES.dark)
 
-  const handleEditor1Change = (value: any) => {
+  const handleEditor1Change = useCallback((value: any) => {
     setEditor1Value(value)
-  }
+  }, [])
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     onSave(editor1Value)
     onClose()
-  }
-
+  }, [editor1Value, onSave, onClose])
 
   useEffect(() => {
-    const fields = localStorage.getItem("fieldsList")
     const schemaUsedStorage = localStorage.getItem("schemaUsed")
     const schemaUsed: boolean = schemaUsedStorage ? schemaUsedStorage === "true" : false
+    const fields = localStorage.getItem("fieldsList")
+
     if (fields) {
-      console.log("fields", JSON.parse(fields))
-      console.log("DAFAS")
       const conversion = fieldsToJsonSchema(JSON.parse(fields), schemaUsed)
       setEditor1Value(JSON.stringify(conversion, null, 4))
     }
-  }, [theme])
+  }, [])
 
-
-  function handleEditorValidation(markers: any[]) {
+  const handleEditorValidation = useCallback((markers: any[]) => {
     markers.forEach((marker) => console.log("onValidate:", marker.message))
-  }
+  }, [])
 
-  const onSaveAndSetEditor1Value = (dataEditorSchema: any) => {
+  const onSaveAndSetEditor1Value = useCallback((dataEditorSchema: any) => {
     setEditor1Value(dataEditorSchema)
     onSave(dataEditorSchema)
-  }
+  }, [onSave])
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="full">
@@ -61,14 +63,15 @@ const EditorModalJSONSchema = ({ isOpen, onClose, onSave }: EditorModalProps) =>
       <ModalContent h="full" maxHeight="none">
         <ModalHeader>Schema Preview2</ModalHeader>
         <Select placeholder="Select theme" onChange={(e) => setTheme(e.target.value)}>
-          <option value="light">Light</option>
-          <option value="vs-dark">Dark</option>
+          {Object.entries(THEMES).map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
         </Select>
         <ModalCloseButton />
         <Flex justifyContent="flex-end" p={4}>
-          <Button onClick={() =>
-            onSaveAndSetEditor1Value(editor1Value)
-          }>Save</Button>
+          <Button onClick={onSaveAndSetEditor1Value}>Save</Button>
         </Flex>
         <ModalBody flex="1" display="flex">
           <Editor

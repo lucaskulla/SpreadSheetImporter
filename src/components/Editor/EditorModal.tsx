@@ -80,43 +80,32 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
 
   const editorHeight = "calc(45vh - 10px)" // -20px to account for the gap
 
-
   function checkWhichPropertiesAdded(modified: string) {
+    const modifiedJSON = JSON.parse(modified);
+    const originalJSON = data;
 
-    const originalJSON = data
-    const modifiedJSON = JSON.parse(modified)
-
-    let originalKeys: string[] = []
-    let modifiedKeys: string[] = []
-
-    try {
-      originalKeys = Object.keys(originalJSON[0])
-    } catch (e) {
-      console.log(e)
-    }
+    const getKeys = (obj: any) => obj?.validData ? Object.keys(obj.validData[0]) : Object.keys(obj[0]);
+    const filterUniqueKeys = (arr1: string[], arr2: string[]) => arr1.filter(key => !arr2.includes(key));
 
     try {
-      modifiedKeys = Object.keys(modifiedJSON[0])
-    } catch (e) {
-      console.log(e)
+      const originalKeys = getKeys(originalJSON);
+      const modifiedKeys = getKeys(modifiedJSON);
+
+      const keysOnlyInOriginal = filterUniqueKeys(originalKeys, modifiedKeys);
+      const keysOnlyInModified = filterUniqueKeys(modifiedKeys, originalKeys);
+
+      return ["keysOnlyInOriginal", keysOnlyInOriginal, "keysOnlyInModified", keysOnlyInModified];
+    } catch (error) {
+      console.error(error);
     }
-
-
-    const keysOnlyInOriginal = originalKeys.filter((key) => !modifiedKeys.includes(key))
-    const keysOnlyInModified = modifiedKeys.filter((key) => !originalKeys.includes(key))
-
-
-    return ["keysOnlyInOriginal", keysOnlyInOriginal, "keysOnlyInModified", keysOnlyInModified]
-
-
   }
-
 
   const onSaveAndSetEditor1Value = (dataEditorSchema: string) => {
-    const changesInKeys = checkWhichPropertiesAdded(dataEditorSchema)
-    setEditor1Value(dataEditorSchema)
-    onSave(dataEditorSchema, changesInKeys)
+    const changesInKeys = checkWhichPropertiesAdded(dataEditorSchema);
+    setEditor1Value(dataEditorSchema);
+    onSave(dataEditorSchema, changesInKeys);
   }
+
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} motionPreset="slideInBottom" size="full" isCentered={false}>
