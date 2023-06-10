@@ -24,10 +24,7 @@ import { SubMatchingSelect } from "./SubMatchingSelect"
 import ModalAddField from "./InputDialog"
 import { EditOrAddIcon } from "./AddEditIcon"
 import type { JSONSchema6 } from "json-schema"
-//TODO welche Schema migrieren und auch anschauen
-//TODO X Daten abfragen nebeneinader anzeigen -> eindruck bekommen, wie unterschiedlich die Daten sind ggf. Diff Tool anschuane
-//TODO Textbox xslt, java script (ggf. preview) (React comopents)
-//TODO M Ende Validierung, ob Daten noch konform sind
+
 const getAccordionTitle = <T extends string>(fields: Fields<T>, column: Column<T>, translations: Translations) => {
   const fieldLabel = fields.find((field) => "value" in column && field.key === column.value)!.label
   return `${translations.matchColumnsStep.matchDropdownTitle} ${fieldLabel} (${
@@ -87,6 +84,7 @@ export const TemplateColumn = <T extends string>({ column, onChange, onSubChange
   useEffect(() => {
     setSelectOption(fields.map(({ label, key }) => ({ value: key, label })))
   }, [fields])
+
 
   const addMissingFieldsFromHeader = () => {
     const fields = getFields()
@@ -158,6 +156,7 @@ export const TemplateColumn = <T extends string>({ column, onChange, onSubChange
 
       const allFieldsNew = getFields()
       localStorage.setItem("fieldsList", JSON.stringify(allFieldsNew))
+
     }
   }
 

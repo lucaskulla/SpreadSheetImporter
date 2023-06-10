@@ -40,6 +40,7 @@ export const mockRsiValues = mockComponentBehaviourForTypes({
     if (field === undefined || field === "") {
       return null
     } else {
+      console.log(fields.find((f) => f.key === field), "FDSAFAS")
       return fields.find((f) => f.key === field)
     }
   },
@@ -51,7 +52,8 @@ export const mockRsiValues = mockComponentBehaviourForTypes({
     console.log(data.all.map((value) => value))
   },
   isOpen: true,
-  onClose: () => {},
+  onClose: () => {
+  },
   uploadStepHook: async (data) => {
     await new Promise((resolve) => {
       setTimeout(() => resolve(data), 4000)

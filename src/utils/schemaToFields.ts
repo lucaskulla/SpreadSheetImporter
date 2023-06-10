@@ -124,6 +124,7 @@ function processProperty(key: string, property: JSONSchema, defs: JSONSchema, pr
   // Create alternateMatches for the property
   field.alternateMatches = createAlternateMatches(property)
 
+
   fieldsList.push(field)
 }
 

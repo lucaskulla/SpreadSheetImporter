@@ -218,8 +218,18 @@ export const MatchColumnsStep = <T extends string>({ data, headerValues, onConti
         }
         setFieldsAdded(true)
       }
+      toast(
+        {
+          title: "Schema used, the field id is mandatory, please map it",
+          status: "info",
+          duration: 9000,
+          isClosable: true,
+        },
+      )
     }
   }
+
+
   const [fieldsAdded, setFieldsAdded] = useState(false)
   useEffect(() => {
     if (!fieldsAdded && isSchemaFetched) {

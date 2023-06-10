@@ -230,7 +230,12 @@ const ModalAddField: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, isChec
   }
 
   const ChakraSelect = (props: { id: any; options: any; value: any; onChange: any; onBlur: any; onFocus: any }) => {
-    const { id, options, value, onChange, onBlur, onFocus } = props
+    let { id, options, value, onChange, onBlur, onFocus } = props
+
+    console.log(props, "props")
+
+    const valueCorrect = props.value["type"] || props.value
+
     const handleChange = (event: { target: { value: any } }) => {
       onChange(event.target.value)
     }
@@ -245,7 +250,7 @@ const ModalAddField: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, isChec
 
     return (
       <FormControl id={id}>
-        <Select value={value || ""} onChange={handleChange} onBlur={handleBlur} onFocus={handleFocus}>
+        <Select value={valueCorrect || ""} onChange={handleChange} onBlur={handleBlur} onFocus={handleFocus}>
           {options.enumOptions.map(
             (
               // @ts-ignore
