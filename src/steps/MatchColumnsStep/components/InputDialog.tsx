@@ -59,7 +59,7 @@ const ModalAddField: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, isChec
       description: {
         type: "string",
       },
-      alternateMatchesArray: {
+      alternateMatches: {
         type: "array",
         items: {
           type: "string",
@@ -381,7 +381,7 @@ const ModalAddField: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, isChec
         <ChakraTextarea {...props} />
       ),
     },
-    alternateMatchesArray: {
+    alternateMatches: {
       "ui:widget": (
         props: JSX.IntrinsicAttributes & { id: any; value: any; onChange: any; onBlur: any; onFocus: any },
       ) => <AlternateMatchesWidget {...props} />,
