@@ -61,7 +61,7 @@ const EditorModalJSONSchema = ({ isOpen, onClose, onSave }: EditorModalProps) =>
     <Modal isOpen={isOpen} onClose={onClose} size="full">
       <ModalOverlay style={{ backdropFilter: "blur(5px)", backgroundColor: "rgba(0, 0, 0, 0.4)" }} />
       <ModalContent h="full" maxHeight="none">
-        <ModalHeader>Schema Preview2</ModalHeader>
+        <ModalHeader>Schema editor</ModalHeader>
         <Select placeholder="Select theme" onChange={(e) => setTheme(e.target.value)}>
           {Object.entries(THEMES).map(([value, label]) => (
             <option key={value} value={value}>

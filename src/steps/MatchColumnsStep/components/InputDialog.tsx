@@ -429,6 +429,7 @@ const ModalAddField: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, isChec
               onSubmit={handleSubmit}
               // @ts-ignore
               formData={createNewField ? "" : getSpecificField(column.value)}
+              //@ts-ignore
               validator={validator}
             >
               <Button type="submit">save</Button>

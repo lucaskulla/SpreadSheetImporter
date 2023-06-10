@@ -81,29 +81,29 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
   const editorHeight = "calc(45vh - 10px)" // -20px to account for the gap
 
   function checkWhichPropertiesAdded(modified: string) {
-    const modifiedJSON = JSON.parse(modified);
-    const originalJSON = data;
+    const modifiedJSON = JSON.parse(modified)
+    const originalJSON = data
 
-    const getKeys = (obj: any) => obj?.validData ? Object.keys(obj.validData[0]) : Object.keys(obj[0]);
-    const filterUniqueKeys = (arr1: string[], arr2: string[]) => arr1.filter(key => !arr2.includes(key));
+    const getKeys = (obj: any) => obj?.validData ? Object.keys(obj.validData[0]) : Object.keys(obj[0])
+    const filterUniqueKeys = (arr1: string[], arr2: string[]) => arr1.filter(key => !arr2.includes(key))
 
     try {
-      const originalKeys = getKeys(originalJSON);
-      const modifiedKeys = getKeys(modifiedJSON);
+      const originalKeys = getKeys(originalJSON)
+      const modifiedKeys = getKeys(modifiedJSON)
 
-      const keysOnlyInOriginal = filterUniqueKeys(originalKeys, modifiedKeys);
-      const keysOnlyInModified = filterUniqueKeys(modifiedKeys, originalKeys);
+      const keysOnlyInOriginal = filterUniqueKeys(originalKeys, modifiedKeys)
+      const keysOnlyInModified = filterUniqueKeys(modifiedKeys, originalKeys)
 
-      return ["keysOnlyInOriginal", keysOnlyInOriginal, "keysOnlyInModified", keysOnlyInModified];
+      return ["keysOnlyInOriginal", keysOnlyInOriginal, "keysOnlyInModified", keysOnlyInModified]
     } catch (error) {
-      console.error(error);
+      console.error(error)
     }
   }
 
   const onSaveAndSetEditor1Value = (dataEditorSchema: string) => {
-    const changesInKeys = checkWhichPropertiesAdded(dataEditorSchema);
-    setEditor1Value(dataEditorSchema);
-    onSave(dataEditorSchema, changesInKeys);
+    const changesInKeys = checkWhichPropertiesAdded(dataEditorSchema)
+    setEditor1Value(dataEditorSchema)
+    onSave(dataEditorSchema, changesInKeys)
   }
 
 
@@ -114,13 +114,18 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
         <ModalHeader display="flex" justifyContent="space-between" alignItems="center">
           Editor
           <ModalCloseButton />
-          <Button onClick={() => onSaveAndSetEditor1Value(editor3Value)}>Save</Button>
         </ModalHeader>
         <ModalBody p={0} h="full">
+
           <Select placeholder="Select theme" onChange={(e) => setTheme(e.target.value)}>
             <option value="light">Light</option>
             <option value="vs-dark">Dark</option>
           </Select>
+          <Box display="flex" justifyContent="flex-end" mt={4}>
+            <Button onClick={() => onSaveAndSetEditor1Value(editor3Value)}>
+              Save
+            </Button>
+          </Box>
           <Grid templateRows="1fr 3fr" gap={6} h="full" p={1}>
             <Grid templateColumns="repeat(3, 1fr)" gap={6}>
               <Editor
@@ -155,9 +160,8 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
                     automaticLayout: true,
                   }}
                 />
-                <Box color="white">
-                  <Button onClick={executeCode} size="md" height="48px" width="calc(55vh - 0px)"
-                          borderColor="green.500">
+                <Box display="flex" justifyContent="center" mt={4}>
+                  <Button onClick={executeCode}>
                     Execute
                   </Button>
                 </Box>

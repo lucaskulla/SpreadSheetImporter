@@ -1,27 +1,32 @@
-import { ReactSpreadsheetImport } from "./ReactSpreadsheetImport"
+import { defaultTheme, ReactSpreadsheetImport } from "./ReactSpreadsheetImport"
 import {
   Box,
   Button,
-  Code,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  Text,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react"
 import { mockRsiValues } from "./stories/mockRsiValues"
 import React, { useCallback, useEffect, useState } from "react"
 import type { Data } from "./types"
-import { Field } from "./types"
+import { Field, RsiProps } from "./types"
 import { saveAs } from "file-saver"
 import fieldsToJsonSchema from "./utils/fieldsToSchema"
 import apiClient from "./api/apiClient"
 import EditorModal from "./components/Editor/EditorModal"
 import { JSONSchema6 } from "json-schema"
 import EditorModalJSONSchema from "./components/Editor/EditorJsonSchema"
+import UploadModal from "./components/UploadToAPI"
+import { translations } from "./translationsRSIProps"
+import merge from "lodash/merge"
+import { rtlThemeSupport } from "./theme"
+import { Providers } from "./components/Providers"
 
 
 export const Basic = () => {
@@ -38,6 +43,11 @@ export const Basic = () => {
 
   const [editor1Value, setEditor1Value] = useState("// After import of data the data is displayed here")
 
+
+  const [uploadModalOpen, setUploadModalOpen] = useState(false)
+
+  const [schemaName, setSchemaName] = useState("urn:kaapana:newSchema:0.0.1")
+
   const handleEditor1Change = (value: string) => {
     const valueAsJSON = JSON.parse(value)
     console.log(valueAsJSON)
@@ -53,23 +63,35 @@ export const Basic = () => {
 
   // Function to download data as a CSV file
   function downloadCSV(data: Data<string>[], fileName: string): void {
+    console.log(data, "fsjalf")
+    if (data.length === 0) {
+      errorToast("No data to download")
+      return
+    }
     const csvData = convertToCSV(data)
     const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" })
     saveAs(blob, fileName)
   }
 
   function handleDownloadButtonClick(fileName: string): void {
-    if (data) {
-      downloadCSV(data[fileName], fileName + ".csv")
-    } else {
-      console.log("Data not avaiable")
+    try {
+      if (data) {
+        console.log("Data avaiable", data)
+        downloadCSV(data[fileName], fileName + ".csv")
+      } else {
+        console.log("Data not avaiable")
+      }
+    } catch (e) {
+      errorToast("Error while downloading file, error message: " + e)
     }
+
   }
 
   function uploadDataToAPI(): void {
     const urn = localStorage.getItem("schemaToUse")
 
     if (data && data["validData"]) {
+      let errorThrown = false
       data["validData"].forEach((item: any) => {
         // Send a POST request for each item
         apiClient
@@ -81,8 +103,24 @@ export const Basic = () => {
           .catch((error: any) => {
             console.error(`Error occurred while uploading data for item: ${JSON.stringify(item)}`)
             console.error(error)
+            if (!errorThrown) {
+              const errorMessage = error.message || "An unexpected error occurred"
+              errorToast(errorMessage)
+              errorThrown = true
+            }
           })
       })
+      if (!errorThrown) {
+        toast({
+          title: "Upload successful.",
+          description: "Your data have been successfully uploaded.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        })
+      }
+      errorThrown = false
+
     }
   }
 
@@ -92,7 +130,7 @@ export const Basic = () => {
         status: "error",
         variant: "left-accent",
         position: "bottom-left",
-        title: "Upload failed",
+        title: "Upload / Download failed",
         description: description,
         isClosable: true,
       })
@@ -118,11 +156,18 @@ export const Basic = () => {
     const schemaUsedStorage = localStorage.getItem("schemaUsed")
     const schemaUsed: boolean = schemaUsedStorage ? schemaUsedStorage === "true" : false
     if (fields) {
-      const conversion = fieldsToJsonSchema(JSON.parse(fields), schemaUsed)
+      let conversion = fieldsToJsonSchema(JSON.parse(fields), schemaUsed)
+      conversion["$id"] = localStorage.getItem("schemaName")
       console.log(JSON.stringify(conversion, null, 2), "conversion")
       apiClient
         .post("/schema", conversion)
-        .then((r: any) => console.log(r))
+        .then((r: any) => toast({
+          title: "Upload successful.",
+          description: "Your schema have been successfully uploaded.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        }))
         .catch((e: { message: string }) => {
           const errorMessage = e.message || "An unexpected error occurred"
           errorToast(errorMessage)
@@ -134,6 +179,8 @@ export const Basic = () => {
   function saveDataFromEditor(dataEditor: string, changesInKeys: any): void {
     const dataAsJSON = JSON.parse(dataEditor)
     setData(dataAsJSON)
+    let changeKeyOriginial = false
+    let changeKeyNew = false
 
     const fieldsList = localStorage.getItem("fieldsList")
     if (!fieldsList) return
@@ -145,9 +192,18 @@ export const Basic = () => {
 
     if (changesKeyInOriginal.length > 0) {
       fieldsAsJSON = fieldsAsJSON.filter((jsonObject: any) => !changesKeyInOriginal.includes(jsonObject.key))
+      changeKeyOriginial = true
+      toast({
+        title: "Changes in the data detected, it appears that properties have been removed.",
+        description: "The fields list has been updated",
+        status: "info",
+        duration: 5000,
+        isClosable: true,
+      })
     }
 
     if (changesKeyInNew.length > 0) {
+      changeKeyNew = true
       changesKeyInNew.forEach((key: string) => {
         if (fieldsAsJSON.find((field: any) => field.key === key)) {
           console.log("Field already exists")
@@ -166,10 +222,22 @@ export const Basic = () => {
           fieldsAsJSON.push(fieldToAdd)
         }
       })
+
+      toast({
+        title: "Changes in the data detected, it appears that properties have been added.",
+        description: "The fields list has been updated",
+        status: "info",
+        duration: 5000,
+        isClosable: true,
+      })
     }
 
     localStorage.removeItem("fieldsList")
     localStorage.setItem("fieldsList", JSON.stringify(fieldsAsJSON))
+
+    if (changeKeyOriginial || changeKeyNew) {
+      setIsOpenJsonEditor(true)
+    }
   }
 
 
@@ -185,193 +253,117 @@ export const Basic = () => {
     localStorage.setItem("schemaUsed", "false")
   }
 
-  function handlePreviewButtonClick(): void {
-    setSchemaRender(true)
-    setShowPreview(!showPreview)
-  }
+  const props: RsiProps<any> = mockRsiValues
+  const mergedTranslations =
+    props.translations !== translations
+      ? merge(translations, props.translations)
+      : translations
+  const mergedThemes = props.rtl
+    ? merge(defaultTheme, rtlThemeSupport, props.customTheme)
+    : merge(defaultTheme, props.customTheme)
 
   return (
-    <>
-      <Box py={20} display="flex" gap="8px" alignItems="center">
-        <Button
-          onClick={() => {
-            removeOldStorage()
-            onOpen()
-          }}
-          border="2px solid #7069FA"
-          p="8px"
-          borderRadius="8px"
-        >
-          Start harmonizing your data
-        </Button>
-      </Box>
-
-      {data && (
-        <Box py={20} display="flex" gap="8px" alignItems="center">
-          <Button
-            onClick={onOpenEditor}
-            bg="blue.500"
-            p="8px"
-            border="2px solid #718096"
-            borderRadius="8px"
-            _hover={{ bg: "blue.600" }}
-            _active={{ bg: "blue.700" }}
-          >
-            Edit Data
-          </Button>
-
-          <Button
-            onClick={() => setIsOpenJsonEditor(!isOpenJsonEditor)}
-            bg="blue.500"
-            p="8px"
-            border="2px solid #718096"
-            borderRadius="8px"
-            _hover={{ bg: "blue.600" }}
-            _active={{ bg: "blue.700" }}
-          >
-            Edit Schema
-          </Button>
-
-          <EditorModalJSONSchema isOpen={isOpenJsonEditor} onClose={() => setIsOpenJsonEditor(false)}
-                                 onSave={handleEditor1Change} />
-          <Modal isOpen={isEditorOpen} onClose={onCloseEditor} motionPreset="slideInBottom">
-            <ModalOverlay style={{ backdropFilter: "blur(5px)", backgroundColor: "rgba(0, 0, 0, 0.4)" }} />
-            <ModalContent>
-              <ModalHeader display="flex" justifyContent="space-between" alignItems="center">
-                Editor
-                <ModalCloseButton />
-              </ModalHeader>
-              <ModalBody>
-                <EditorModal isOpen={isEditorOpen} onClose={onCloseEditor} data={data} onSave={saveDataFromEditor}
-                />
-                {data && (
-                  <Box marginTop="10px">
-                  </Box>
-                )}
-              </ModalBody>
-            </ModalContent>
-          </Modal>
-        </Box>
-      )}
-
-      {data && (
+    <Providers theme={mergedThemes} rsiValues={{ ...props, translations: mergedTranslations }}>
+      <>
         <Box py={20} display="flex" flexDirection="column" alignItems="center" gap="16px">
-          <Box display="flex" gap="16px">
+          <Text fontSize="2xl" mb="4">1. Import and harmonize</Text>
+          <Button
+            onClick={() => {
+              removeOldStorage()
+              onOpen()
+            }}
+            border="2px solid #7069FA"
+            p="8px"
+            borderRadius="8px"
+          >
+            Start harmonizing your data
+          </Button>
+        </Box>
+
+        {data && (
+          <Box py={20} display="flex" flexDirection="column" alignItems="center" gap="16px">
+            <Text fontSize="2xl" mb="4">2. Modify the data or schema</Text>
             <Button
-              onClick={() => handleDownloadButtonClick("all")}
-              bg="teal.500"
-              color="black"
-              p="8px"
+              onClick={onOpenEditor}
               border="2px solid #718096"
               borderRadius="8px"
-              _hover={{ bg: "teal.600" }}
-              _active={{ bg: "teal.700" }}
             >
-              Download all Data
-            </Button>
-            <Button
-              onClick={() => handleDownloadButtonClick("validData")}
-              bg="purple.500"
-              color="black"
-              p="8px"
-              border="2px solid #718096"
-              borderRadius="8px"
-              _hover={{ bg: "purple.600" }}
-              _active={{ bg: "purple.700" }}
-            >
-              Download Valid Data
-            </Button>
-            <Button
-              onClick={() => handleDownloadButtonClick("invalidData")}
-              bg="blue.500"
-              color="black"
-              p="8px"
-              border="2px solid #718096"
-              borderRadius="8px"
-              _hover={{ bg: "blue.600" }}
-              _active={{ bg: "blue.700" }}
-            >
-              Download Invalid Data
-            </Button>
-            <Button
-              onClick={() => handlePreviewButtonClick()}
-              bg="blue.500"
-              color="black"
-              p="8px"
-              border="2px solid #718096"
-              borderRadius="8px"
-              _hover={{ bg: "blue.600" }}
-              _active={{ bg: "blue.700" }}
-            >
-              {showPreview ? "Hide Schema Preview" : "Show Schema Preview"}
+              Edit data
             </Button>
 
             <Button
-              onClick={uploadDataToAPI}
-              bg="blue.500"
-              color="black"
+              onClick={() => setIsOpenJsonEditor(!isOpenJsonEditor)}
               p="8px"
               border="2px solid #718096"
               borderRadius="8px"
-              _hover={{ bg: "blue.600" }}
-              _active={{ bg: "blue.700" }}
             >
-              Upload Data to API
+              Edit schema
             </Button>
-            <Box py={20} display="flex" gap="8px" alignItems="center">
+
+            <EditorModalJSONSchema isOpen={isOpenJsonEditor} onClose={() => setIsOpenJsonEditor(false)}
+                                   onSave={handleEditor1Change} />
+            <Modal isOpen={isEditorOpen} onClose={onCloseEditor} motionPreset="slideInBottom">
+              <ModalOverlay style={{ backdropFilter: "blur(5px)", backgroundColor: "rgba(0, 0, 0, 0.4)" }} />
+              <ModalContent>
+                <ModalHeader display="flex" justifyContent="space-between" alignItems="center">
+                  Editor
+                  <ModalCloseButton />
+                </ModalHeader>
+                <ModalBody>
+                  <EditorModal isOpen={isEditorOpen} onClose={onCloseEditor} data={data} onSave={saveDataFromEditor}
+                  />
+                  {data && (
+                    <Box marginTop="10px">
+                    </Box>
+                  )}
+                </ModalBody>
+              </ModalContent>
+            </Modal>
+          </Box>
+        )}
+
+        {data && (
+          <Box py={20} display="flex" flexDirection="column" alignItems="center" gap="16px">
+            <Text fontSize="2xl" mb="4">3. Export the data</Text>
+            <Box display="flex" gap="16px">
               <Button
-                onClick={uploadNewSchemaToAPI}
-                bg="blue.500"
+                onClick={() => handleDownloadButtonClick("all")}
                 p="8px"
                 border="2px solid #718096"
                 borderRadius="8px"
-                _hover={{ bg: "blue.600" }}
-                _active={{ bg: "blue.700" }}
               >
-                Upload Schema to API
+                Download data as .csv
               </Button>
+              <Button
+                onClick={() => handleDownloadButtonClick("invalidData")}
+                p="8px"
+                border="2px solid #718096"
+                borderRadius="8px"
+              >
+                Download invalid data as .csv
+              </Button>
+              <Button
+                onClick={() => setUploadModalOpen(true)}
+                p="8px"
+                border="2px solid #718096"
+                borderRadius="8px"
+              >
+                Open Upload Modal
+              </Button>
+              <UploadModal
+                isOpen={uploadModalOpen}
+                onClose={() => setUploadModalOpen(false)}
+                onUploadData={uploadDataToAPI}
+                onUploadSchema={uploadNewSchemaToAPI}
+                setSchemaName={setSchemaName}
+              />
+
             </Box>
           </Box>
-        </Box>
-      )}
-
-      <ReactSpreadsheetImport {...mockRsiValues} isOpen={isOpen} onClose={onClose} onSubmit={setData} />
-
-
-      {showPreview && previewSchema && (
-        <Box pt={64} display="flex" gap="8px" flexDirection="column">
-          <b>Schema:</b>
-          <Code
-            display="flex"
-            alignItems="center"
-            borderRadius="16px"
-            fontSize="12px"
-            background="#4A5568"
-            color="white"
-            p={32}
-          >
-            <pre>{JSON.stringify(previewSchema, undefined, 4)}</pre>
-          </Code>
-        </Box>
-      )}
-
-      {data && (
-        <Box pt={64} display="flex" gap="8px" flexDirection="column">
-          <b>Returned data:</b>
-          <Code
-            display="flex"
-            alignItems="center"
-            borderRadius="16px"
-            fontSize="12px"
-            background="#4A5568"
-            color="white"
-            p={32}
-          >
-            <pre>{JSON.stringify(data, undefined, 4)}</pre>
-          </Code>
-        </Box>
-      )}
-    </>
+        )}
+        <ReactSpreadsheetImport {...mockRsiValues} isOpen={isOpen} onClose={onClose} onSubmit={setData} />
+      </>
+    </Providers>
   )
 
 
