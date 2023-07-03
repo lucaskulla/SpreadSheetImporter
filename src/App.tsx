@@ -98,7 +98,6 @@ export const Basic = () => {
           .post("/object/" + urn, item, { params: { skip_validation: false } })
           .then((response: any) => {
             console.log(`Data uploaded successfully for item: ${JSON.stringify(item)}`)
-            console.log(response)
           })
           .catch((error: any) => {
             console.error(`Error occurred while uploading data for item: ${JSON.stringify(item)}`)

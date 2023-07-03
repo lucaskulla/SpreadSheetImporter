@@ -232,8 +232,6 @@ const ModalAddField: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, isChec
   const ChakraSelect = (props: { id: any; options: any; value: any; onChange: any; onBlur: any; onFocus: any }) => {
     let { id, options, value, onChange, onBlur, onFocus } = props
 
-    console.log(props, "props")
-
     const valueCorrect = props.value["type"] || props.value
 
     const handleChange = (event: { target: { value: any } }) => {

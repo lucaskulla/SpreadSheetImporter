@@ -40,7 +40,6 @@ export const mockRsiValues = mockComponentBehaviourForTypes({
     if (field === undefined || field === "") {
       return null
     } else {
-      console.log(fields.find((f) => f.key === field), "FDSAFAS")
       return fields.find((f) => f.key === field)
     }
   },
