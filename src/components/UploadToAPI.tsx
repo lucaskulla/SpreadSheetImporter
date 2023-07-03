@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import {
   Box,
   Button,
@@ -47,6 +47,14 @@ const UploadModal: React.FC<UploadModalProps> = ({
     const regex = /^urn:[a-zA-Z0-9]+:[a-zA-Z0-9]/
     return regex.test(name)
   }
+
+  useEffect(() => {
+
+    const originalSchemaName = localStorage.getItem("schemaName")
+    if (originalSchemaName !== "urn:kaapana:newSchema:0.0.1") {
+      setSchemaNameLocal(originalSchemaName || "")
+    }
+  }, [])
 
   const handleSubmit = () => {
     if (uploadSchema) {
@@ -110,7 +118,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
                     isInvalid={!isSchemaNameValid(schemaName)}
                   />
                   <FormHelperText>{isSchemaNameValid(schemaName) ? "Valid Schema Name" : "Invalid Schema Name"}</FormHelperText>
-                  <FormHelperText>Example: urn:domain:schemaName</FormHelperText>
+                  <FormHelperText>Example: urn:namespace:schemaName</FormHelperText>
                 </FormControl>
               </Box>
             )}

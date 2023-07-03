@@ -249,6 +249,8 @@ export const Basic = () => {
     localStorage.removeItem("newField")
     localStorage.removeItem("schema")
     localStorage.removeItem("fields")
+    localStorage.removeItem("schemaName")
+
 
     localStorage.setItem("schemaUsed", "false")
   }
@@ -348,7 +350,7 @@ export const Basic = () => {
                 border="2px solid #718096"
                 borderRadius="8px"
               >
-                Open Upload Modal
+                Open upload dialog
               </Button>
               <UploadModal
                 isOpen={uploadModalOpen}

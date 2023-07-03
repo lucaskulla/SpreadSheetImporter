@@ -20,12 +20,13 @@ type Props<T extends string> = {
 }
 
 export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
-  const { translations, fields, onClose, onSubmit, rowHook, tableHook, getFields } = useRsi<T>()
+  const { translations, onClose, onSubmit, rowHook, tableHook, getFields } = useRsi<T>()
+  let fields = getFields()
   const styles = useStyleConfig("ValidationStep") as typeof themeOverrides["components"]["ValidationStep"]["baseStyle"]
 
   const [data, setData] = useState<(Data<T> & Meta)[]>(
     useMemo(
-      () => addErrorsAndRunHooks<T>(initialData, fields, rowHook, tableHook),
+      () => addErrorsAndRunHooks<T>(initialData, getFields(), rowHook, tableHook),
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [],
     ),
@@ -115,10 +116,7 @@ export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
     if (localStorage.getItem("schemaUsed") === "true") {
 
       const ajv = new Ajv2020()
-
-
       const schema = localStorage.getItem("schemaFromAPI")
-
 
       if (schema) {
         // @ts-ignore
@@ -128,11 +126,8 @@ export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
         //ajv.addKeyword(schemaParsed["$schema"])
         const draft7MetaSchema = require("ajv/dist/refs/json-schema-draft-07.json")
         ajv.addMetaSchema(draft7MetaSchema)
-
         ajv.addKeyword("metamodel_version")
         ajv.addKeyword("version")
-
-
         const validate = ajv.compile(schemaParsed)
         // Validate data against the schema
 
@@ -182,7 +177,8 @@ export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
           submitData()
         }}
       />
-      <DataIsInvalid isOpen={isAlertOpen} onClose={() => setIsAlertOpen(false)} onConfirm={handleAlertConfirm} />
+      <DataIsInvalid isOpen={isAlertOpen} onClose={() => setIsAlertOpen(false)} onConfirm={handleAlertConfirm}
+                     onCancel={submitData} />
       <ModalBody pb={0}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb="2rem" flexWrap="wrap" gap="8px">
           <Heading sx={styles.heading}>{translations.validationStep.title}</Heading>

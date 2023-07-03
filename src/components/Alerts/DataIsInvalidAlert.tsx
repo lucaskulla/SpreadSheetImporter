@@ -14,9 +14,10 @@ interface Props {
   isOpen: boolean
   onClose: () => void
   onConfirm: () => void
+  onCancel?: () => void
 }
 
-export const DataIsInvalid = ({ isOpen, onClose, onConfirm }: Props) => {
+export const DataIsInvalid = ({ isOpen, onClose, onConfirm, onCancel }: Props) => {
   const { translations } = useRsi()
   const cancelRef = useRef<HTMLButtonElement | null>(null)
 
@@ -32,6 +33,9 @@ export const DataIsInvalid = ({ isOpen, onClose, onConfirm }: Props) => {
             </Button>
             <Button colorScheme="red" onClick={onConfirm} ml={3}>
               {translations.alerts.invalidData.exitButtonTitle}
+            </Button>
+            <Button onClick={onCancel} ml={3}>
+              Go on anyway
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
