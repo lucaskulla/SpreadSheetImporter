@@ -23,9 +23,10 @@ export const DropZone = ({ onContinue, isLoading }: DropZoneProps) => {
     maxFiles: 1,
     maxSize: maxFileSize,
     accept: {
-      "csv": [".csv"],
-      "xls": [".xls"],
-      ".xlsx": [".xlsx"],
+      "text/*": [".csv"],
+      "application/vnd.ms-excel": [".xlsx", ".xls"],
+
+
     },
     onDropRejected: (fileRejections) => {
       setLoading(false)
