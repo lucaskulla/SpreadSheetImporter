@@ -41,6 +41,7 @@ class ApiClient {
   }
 }
 
-const apiClient = new ApiClient("http://localhost:8000")
+const url = window.location.hostname;
+const apiClient = new ApiClient("http://" + url + ":8000")
 
 export default apiClient
