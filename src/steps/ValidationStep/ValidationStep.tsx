@@ -10,7 +10,7 @@ import { SubmitDataAlert } from "../../components/Alerts/SubmitDataAlert"
 import type { Data } from "../../types"
 import type { themeOverrides } from "../../theme"
 import type { RowsChangeData } from "react-data-grid"
-import { DataIsInvalid } from "../../components/Alerts/DataIsInvalidAlert" // Import the DataIsInvalid component
+import { DataIsInvalid } from "../../components/Alerts/DataIsInvalidAlert"
 
 const Ajv2020 = require("ajv/dist/2020")
 
@@ -167,6 +167,7 @@ export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
     }
   }
 
+  // @ts-ignore
   return (
     <>
       <SubmitDataAlert
@@ -203,8 +204,8 @@ export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
             onRowsChange={updateRow}
             columns={columns}
             selectedRows={selectedRows}
-            onSelectedRowsChange={setSelectedRows}
             //@ts-ignore
+            onSelectedRowsChange={setSelectedRows}
             components={{
               noRowsFallback: (
                 <Box display="flex" justifyContent="center" gridColumn="1/-1" mt="32px">

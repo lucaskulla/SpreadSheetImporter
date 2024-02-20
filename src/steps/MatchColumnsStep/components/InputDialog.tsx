@@ -274,6 +274,7 @@ const ModalAddField: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, isChec
     const updateValidation = (index: React.Key | null | undefined, updatedValidation: any) => {
       const newValidations = currentValidations.slice()
       if (index === null || index === undefined) return
+      // @ts-ignore
       newValidations[index] = updatedValidation
       setCurrentValidations(newValidations)
       onChange(newValidations)
@@ -302,7 +303,6 @@ const ModalAddField: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, isChec
   }
 
   const ValidationEditor = ({
-                              index,
                               validation,
                               onChange,
                             }: {
