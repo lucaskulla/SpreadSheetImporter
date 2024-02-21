@@ -9,7 +9,7 @@ export type RsiProps<T extends string> = {
   // callback when RSI is closed before final submit
   onClose: () => void
   // Field description for requested data
-  fields?: Fields<T> //ist jetzt optional, mal schauen, ob das klappt!
+  fields?: Fields<T>
   //Set field property -> ACHTUNG: Man darf nicht den KEY ändern. Das führt zu Problemen!
   addField: (fields: Field<string>) => void
   //Get field property

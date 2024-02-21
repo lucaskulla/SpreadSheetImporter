@@ -17,38 +17,52 @@ export const DropZone = ({ onContinue, isLoading }: DropZoneProps) => {
   const styles = useStyleConfig("UploadStep") as typeof themeOverrides["components"]["UploadStep"]["baseStyle"]
   const toast = useToast()
   const [loading, setLoading] = useState(false)
+
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     noClick: true,
     noKeyboard: true,
     maxFiles: 1,
     maxSize: maxFileSize,
     accept: {
-      "text/*": [".csv"],
-      "application/vnd.ms-excel": [".xlsx", ".xls"],
-
-
+      'text/csv': ['.csv'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+      'application/vnd.ms-excel': ['.xls'],
     },
     onDropRejected: (fileRejections) => {
-      setLoading(false)
+      setLoading(false);
       fileRejections.forEach((fileRejection) => {
         toast({
-          status: "error",
-          variant: "left-accent",
-          position: "bottom-left",
+          status: 'error',
+          variant: 'left-accent',
+          position: 'bottom-left',
           title: `${fileRejection.file.name} ${translations.uploadStep.dropzone.errorToastDescription}`,
           description: fileRejection.errors[0].message,
           isClosable: true,
-        })
-      })
+        });
+      });
     },
     onDrop: async ([file]) => {
-      setLoading(true)
-      const arrayBuffer = await readFileAsync(file)
-      const workbook = XLSX.read(arrayBuffer, { cellDates: true, dateNF: dateFormat, raw: parseRaw })
-      setLoading(false)
-      onContinue(workbook)
+      setLoading(true);
+      try {
+        const arrayBuffer = await readFileAsync(file);
+        const workbook = XLSX.read(arrayBuffer, { cellDates: true, dateNF: dateFormat, raw: parseRaw });
+        onContinue(workbook);
+      } catch (error) {
+        console.error('Error processing file:', error);
+        toast({
+          status: 'error',
+          variant: 'left-accent',
+          position: 'bottom-left',
+          title: 'Error processing file',
+          description: (error as Error).toString(),
+          isClosable: true,
+        });
+      } finally {
+        setLoading(false);
+      }
     },
-  })
+  });
+
 
   return (
     <Box

@@ -11,6 +11,7 @@ import type { Data } from "../../types"
 import type { themeOverrides } from "../../theme"
 import type { RowsChangeData } from "react-data-grid"
 import { DataIsInvalid } from "../../components/Alerts/DataIsInvalidAlert"
+import { useSchemaContext } from "../../context/SchemaProvider"
 
 const Ajv2020 = require("ajv/dist/2020")
 
@@ -35,6 +36,10 @@ export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
   const [filterByErrors, setFilterByErrors] = useState(false)
   const [showSubmitAlert, setShowSubmitAlert] = useState(false)
   const [isAlertOpen, setIsAlertOpen] = useState(false)
+
+  const {
+    isSchemaUsed,
+  } = useSchemaContext() // Use the context to get schema-related states and setters
 
   const updateData = useCallback(
     (rows: typeof data) => {
@@ -113,7 +118,7 @@ export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
     let hasInvalidData = false
 
     //Only if schema is used, validation step should be executed
-    if (localStorage.getItem("schemaUsed") === "true") {
+    if (isSchemaUsed) {
 
       const ajv = new Ajv2020()
       const schema = localStorage.getItem("schemaFromAPI")

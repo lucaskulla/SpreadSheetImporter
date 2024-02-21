@@ -20,13 +20,14 @@ import { saveAs } from "file-saver"
 import fieldsToJsonSchema from "./utils/fieldsToSchema"
 import apiClient from "./api/apiClient"
 import EditorModal from "./components/Editor/EditorModal"
-import { JSONSchema6 } from "json-schema"
+import { JSONSchema7 } from "json-schema"
 import EditorModalJSONSchema from "./components/Editor/EditorJsonSchema"
 import UploadModal from "./components/UploadToAPI"
 import { translations } from "./translationsRSIProps"
 import merge from "lodash/merge"
 import { rtlThemeSupport } from "./theme"
 import { Providers } from "./components/Providers"
+import { useSchemaContext } from "./context/SchemaProvider"
 
 
 export const Basic = () => {
@@ -34,7 +35,7 @@ export const Basic = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { isOpen: isEditorOpen, onOpen: onOpenEditor, onClose: onCloseEditor } = useDisclosure()
   const [showPreview, setShowPreview] = useState(false)
-  const [previewSchema, setPreviewSchema] = useState<JSONSchema6>()
+  const [previewSchema, setPreviewSchema] = useState<JSONSchema7>()
 
   const [isOpenJsonEditor, setIsOpenJsonEditor] = useState(false)
   const [schemaRender, setSchemaRender] = useState(false)
@@ -47,6 +48,10 @@ export const Basic = () => {
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
 
   const [schemaName, setSchemaName] = useState("urn:kaapana:newSchema:0.0.1")
+
+  const {
+    isSchemaUsed,
+  } = useSchemaContext() // Use the context to get schema-related states and setters
 
   const handleEditor1Change = (value: string) => {
     const valueAsJSON = JSON.parse(value)
@@ -140,10 +145,8 @@ export const Basic = () => {
   useEffect(() => {
     if (schemaRender) {
       const fields = localStorage.getItem("fieldsList")
-      const schemaUsedStorage = localStorage.getItem("schemaUsed")
-      const schemaUsed: boolean = schemaUsedStorage ? schemaUsedStorage === "true" : false
       if (fields) {
-        const conversion = fieldsToJsonSchema(JSON.parse(fields), schemaUsed)
+        const conversion = fieldsToJsonSchema(JSON.parse(fields), isSchemaUsed)
         setPreviewSchema(conversion)
         setEditor1Value(JSON.stringify(conversion, null, 4))
       }
@@ -152,10 +155,8 @@ export const Basic = () => {
 
   function uploadNewSchemaToAPI(): void {
     const fields = localStorage.getItem("fieldsList")
-    const schemaUsedStorage = localStorage.getItem("schemaUsed")
-    const schemaUsed: boolean = schemaUsedStorage ? schemaUsedStorage === "true" : false
     if (fields) {
-      let conversion = fieldsToJsonSchema(JSON.parse(fields), schemaUsed)
+      let conversion = fieldsToJsonSchema(JSON.parse(fields), isSchemaUsed)
       conversion["$id"] = localStorage.getItem("schemaName")
       console.log(JSON.stringify(conversion, null, 2), "conversion")
       apiClient
@@ -251,7 +252,6 @@ export const Basic = () => {
     localStorage.removeItem("schemaName")
 
 
-    localStorage.setItem("schemaUsed", "false")
   }
 
   const props: RsiProps<any> = mockRsiValues

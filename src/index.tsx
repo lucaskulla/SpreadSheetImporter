@@ -1,14 +1,15 @@
 import React from "react"
 import * as ReactDOM from "react-dom/client"
 import App from "./App"
-import { SchemaProvider } from "./context/SchemaContext" // Ensure the path is correct based on your project structure
+import { CompositeProvider } from "./context/CompositeProvider"
+
 
 const root = ReactDOM.createRoot(document.getElementById("root")!)
 
 root.render(
   <React.StrictMode>
-    <SchemaProvider>
-        <App />
-    </SchemaProvider>
+    <CompositeProvider>
+      <App />
+    </CompositeProvider>
   </React.StrictMode>,
 )

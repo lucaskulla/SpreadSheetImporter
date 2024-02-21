@@ -24,3 +24,6 @@ export const findMatch = <T extends string>(
   }, {} as AutoMatchAccumulator<T>)
   return smallestValue.distance <= autoMapDistance ? smallestValue.value : undefined
 }
+
+
+

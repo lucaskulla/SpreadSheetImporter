@@ -12,11 +12,7 @@ import type { Field, Fields, RawData } from "../../types"
 import { getMatchedColumns } from "./utils/getMatchedColumns"
 import { UnmatchedFieldsAlert } from "../../components/Alerts/UnmatchedFieldsAlert"
 import { findUnmatchedRequiredFields } from "./utils/findUnmatchedRequiredFields"
-import apiClient from "../../api/apiClient"
-import schemaToFields from "../../utils/schemaToFields"
-import type { RJSFSchema } from "@rjsf/utils"
-import type { AxiosResponse } from "axios"
-import type { JSONSchema6 } from "json-schema"
+import { useSchemaContext } from "../../context/SchemaProvider"
 
 export type MatchColumnsProps<T extends string> = {
   data: RawData[]
@@ -73,25 +69,36 @@ export type Column<T extends string> =
 
 export type Columns<T extends string> = Column<T>[]
 
+export function hasValue<T extends string>(column: Column<T>): column is MatchedColumn<T> | MatchedSwitchColumn<T> | MatchedSelectColumn<T> | MatchedSelectOptionsColumn<T> {
+  return "value" in column
+}
+
 export const MatchColumnsStep = <T extends string>({ data, headerValues, onContinue }: MatchColumnsProps<T>) => {
   const toast = useToast()
   const dataExample = data.slice(0, 2)
-  const { autoMapHeaders, autoMapDistance, translations, getFields, addField } = useRsi<T>() // LK: Hier war eigentlich noch fields drin
+  const { autoMapHeaders, autoMapDistance, translations, getFields, addField } = useRsi<T>()
   const [isLoading, setIsLoading] = useState(false)
   const [columns, setColumns] = useState<Columns<T>>(
     // Do not remove spread, it indexes empty array elements, otherwise map() skips over them
     ([...headerValues] as string[]).map((value, index) => ({ type: ColumnType.empty, index, header: value ?? "" })),
   )
   let fields = getFields()
+
+  const {
+    isSchemaUsed,
+    selectedSchema,
+    convertedSchema,
+  } = useSchemaContext() // Use the context to get schema-related states and setters
+
+
   const [showUnmatchedFieldsAlert, setShowUnmatchedFieldsAlert] = useState(false)
 
-  const [fetchedSchema, setFetchedSchema] = useState<JSONSchema6>({})
-  const [convertedSchema, setConvertedSchema] = useState<Fields<string>>()
   const onChange = useCallback(
     (value: T, columnIndex: number) => {
       //needs to directly call getFields(). If not adding a new field and directly assigning it will not work.
       const field = getFields().find((field) => field.key === value) as unknown as Field<T>
       const existingFieldIndex = columns.findIndex((column) => "value" in column && column.value === field.key)
+
       setColumns(
         columns.map<Column<T>>((column, index) => {
           columnIndex === index ? setColumn(column, field, data) : column
@@ -122,10 +129,6 @@ export const MatchColumnsStep = <T extends string>({ data, headerValues, onConti
       translations.matchColumnsStep.duplicateColumnWarningTitle,
     ],
   )
-
-  useEffect(() => {
-    fields = getFields()
-  }, [])
 
   const onIgnore = useCallback(
     (columnIndex: number) => {
@@ -177,35 +180,9 @@ export const MatchColumnsStep = <T extends string>({ data, headerValues, onConti
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fields])
 
-  const [isSchemaFetched, setIsSchemaFetched] = useState(false)
-
-  useEffect(() => {
-    const fetchSchema = async () => {
-      try {
-        const selectedSchema = localStorage.getItem("schemaToUse")
-        if (selectedSchema !== null) {
-          const response = (await apiClient.get("/schema/" + selectedSchema)) as AxiosResponse<RJSFSchema>
-          if (response.data) {
-            const version = selectedSchema.substring(selectedSchema.lastIndexOf(":") + 1) // "0.0.1"
-            localStorage.setItem("schemaFromAPI", JSON.stringify(response.data[version]))
-            setFetchedSchema(response.data[version])
-            setConvertedSchema(schemaToFields(response.data[version]))
-            setIsSchemaFetched(true)
-          }
-        } else {
-          console.log("Schema already fetched")
-        }
-      } catch (error) {
-        console.error("Error fetching options:", error)
-      }
-    }
-    fetchSchema()
-  }, [])
 
   const addMissingFieldsFromHeader = async (fields: Fields<string>) => {
-    const schemaUsed = localStorage.getItem("schemaUsed")
-    if (schemaUsed === "true") {
-      console.log("User wants to reuse a schema")
+    if (isSchemaUsed) {
       if (convertedSchema === undefined) {
         console.log("Schema is undefined")
       } else {
@@ -220,7 +197,7 @@ export const MatchColumnsStep = <T extends string>({ data, headerValues, onConti
       }
       toast(
         {
-          title: "Schema used, the field id is mandatory, please map it",
+          title: "Schema used, the field id is mandatory, please map it", //TODO find all the fields that are mandatory
           status: "info",
           duration: 9000,
           isClosable: true,
@@ -231,13 +208,14 @@ export const MatchColumnsStep = <T extends string>({ data, headerValues, onConti
 
 
   const [fieldsAdded, setFieldsAdded] = useState(false)
+
   useEffect(() => {
-    if (!fieldsAdded && isSchemaFetched) {
+    if (!fieldsAdded) {
       addMissingFieldsFromHeader(getFields())
         .then(() => setFieldsAdded(true))
         .catch((error) => console.error("Error adding missing fields:", error))
     }
-  }, [fieldsAdded, isSchemaFetched])
+  }, [fieldsAdded])
 
   return (
     <>
@@ -264,7 +242,7 @@ export const MatchColumnsStep = <T extends string>({ data, headerValues, onConti
             column={column}
             onChange={onChange}
             onSubChange={onSubChange}
-            schema={fetchedSchema}
+            schema={selectedSchema || {}} // Pass the non-converted schema
             convertedSchema={convertedSchema || []}
           />
         )}
