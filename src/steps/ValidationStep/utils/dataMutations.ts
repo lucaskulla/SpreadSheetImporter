@@ -1,10 +1,11 @@
 import type { Data, Fields, Info, RowHook, TableHook } from "../../../types"
-import type { Meta, Errors } from "../types"
+import type { Errors, Meta } from "../types"
 import { v4 } from "uuid"
+
 
 export const addErrorsAndRunHooks = <T extends string>(
   data: (Data<T> & Partial<Meta>)[],
-  fields: Fields<T>,
+  fields: Fields<string>,
   rowHook?: RowHook<T>,
   tableHook?: TableHook<T>,
 ): (Data<T> & Meta)[] => {
@@ -77,7 +78,7 @@ export const addErrorsAndRunHooks = <T extends string>(
         case "regex": {
           const regex = new RegExp(validation.value, validation.flags)
           data.forEach((entry, index) => {
-            const value = entry[field.key]?.toString() ?? ""
+            const value = entry[field.key as T]?.toString() ?? ""
             if (!value.match(regex)) {
               errors[index] = {
                 ...errors[index],

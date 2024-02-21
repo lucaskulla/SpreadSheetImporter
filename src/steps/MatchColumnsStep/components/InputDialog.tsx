@@ -13,7 +13,6 @@ import Form from "@rjsf/core"
 import React, { useEffect, useState } from "react"
 import type { themeOverrides } from "../../../theme"
 import { Column, hasValue } from "../MatchColumnsStep"
-import { useRsi } from "../../../hooks/useRsi"
 import validator from "@rjsf/validator-ajv8"
 import type { RJSFSchema } from "@rjsf/utils"
 import type { Field } from "../../../types"
@@ -22,6 +21,7 @@ import ChakraSelect from "./widgets/ChakraSelect"
 import AlternateMatchesWidget from "./widgets/AlternateMatchesWidget"
 import ValidationsField from "./widgets/ValidationsField"
 import ChakraInput from "./widgets/ChakraInput"
+import { useFieldContext } from "../../../context/FieldProvider"
 
 //TODO Ende Validierung
 //TODO Post der Daten ggf. 5 Seite erstellen
@@ -35,7 +35,10 @@ interface ModalProps {
 
 
 const ModalAddField: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, column }) => {
-  const { getSpecificField, addField } = useRsi()
+  const {
+    addField,
+    getSpecificField,
+  } = useFieldContext()
 
   const [createNewField, setCreateNewField] = useState(false)
 

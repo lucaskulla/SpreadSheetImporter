@@ -25,8 +25,9 @@ import ModalAddField from "./InputDialog"
 import { EditOrAddIcon } from "./AddEditIcon"
 import type { JSONSchema7 } from "json-schema"
 import { useSchemaContext } from "../../../context/SchemaProvider"
+import { useFieldContext } from "../../../context/FieldProvider"
 
-const getAccordionTitle = <T extends string>(fields: Fields<T>, column: Column<T>, translations: Translations) => {
+const getAccordionTitle = <T extends string>(fields: Fields<string>, column: Column<T>, translations: Translations) => {
   const fieldLabel = fields.find((field) => "value" in column && field.key === column.value)!.label
   return `${translations.matchColumnsStep.matchDropdownTitle} ${fieldLabel} (${
     "matchedOptions" in column && column.matchedOptions.length
@@ -42,22 +43,29 @@ type TemplateColumnProps<T extends string> = {
 }
 
 export const TemplateColumn = <T extends string>({ column, onChange, onSubChange }: TemplateColumnProps<T>) => {
-  const { translations, getFields, addField } = useRsi<T>()
+  const { translations } = useRsi<T>()
   const styles = useStyleConfig("MatchColumnsStep") as Styles
   const isIgnored = column.type === ColumnType.ignored
   const isChecked = useMemo(() => {
     return [ColumnType.matched, ColumnType.matchedCheckbox, ColumnType.matchedSelectOptions].includes(column.type)
   }, [column.type])
-  const fields = getFields()
   const isSelect = "matchedOptions" in column
-  const selectOption = useMemo(() => fields.map(({ label, key }) => ({ value: key, label })), [fields])
-  const selectValue = selectOption.find(({ value }) => "value" in column && column.value === value)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-
 
   const {
     isSchemaUsed,
   } = useSchemaContext()
+
+  const {
+    addField,
+    getFields,
+  } = useFieldContext()
+
+  const fields = getFields()
+
+  const selectOption = useMemo(() => fields.map(({ label, key }) => ({ value: key, label })), [fields])
+  const selectValue = selectOption.find(({ value }) => "value" in column && column.value === value)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
 
   const handleFormSubmit = (inputValue: Field<string>) => {
     localStorage.removeItem("fieldsList")

@@ -13,6 +13,7 @@ import { getMatchedColumns } from "./utils/getMatchedColumns"
 import { UnmatchedFieldsAlert } from "../../components/Alerts/UnmatchedFieldsAlert"
 import { findUnmatchedRequiredFields } from "./utils/findUnmatchedRequiredFields"
 import { useSchemaContext } from "../../context/SchemaProvider"
+import { useFieldContext } from "../../context/FieldProvider"
 
 export type MatchColumnsProps<T extends string> = {
   data: RawData[]
@@ -76,19 +77,25 @@ export function hasValue<T extends string>(column: Column<T>): column is Matched
 export const MatchColumnsStep = <T extends string>({ data, headerValues, onContinue }: MatchColumnsProps<T>) => {
   const toast = useToast()
   const dataExample = data.slice(0, 2)
-  const { autoMapHeaders, autoMapDistance, translations, getFields, addField } = useRsi<T>()
+  const { autoMapHeaders, autoMapDistance, translations } = useRsi<T>()
   const [isLoading, setIsLoading] = useState(false)
   const [columns, setColumns] = useState<Columns<T>>(
     // Do not remove spread, it indexes empty array elements, otherwise map() skips over them
     ([...headerValues] as string[]).map((value, index) => ({ type: ColumnType.empty, index, header: value ?? "" })),
   )
-  let fields = getFields()
 
   const {
     isSchemaUsed,
     selectedSchema,
     convertedSchema,
-  } = useSchemaContext() // Use the context to get schema-related states and setters
+  } = useSchemaContext()
+
+  const {
+    addField,
+    getFields,
+  } = useFieldContext()
+
+  let fields = getFields()
 
 
   const [showUnmatchedFieldsAlert, setShowUnmatchedFieldsAlert] = useState(false)

@@ -12,6 +12,7 @@ import type { themeOverrides } from "../../theme"
 import type { RowsChangeData } from "react-data-grid"
 import { DataIsInvalid } from "../../components/Alerts/DataIsInvalidAlert"
 import { useSchemaContext } from "../../context/SchemaProvider"
+import { useFieldContext } from "../../context/FieldProvider"
 
 const Ajv2020 = require("ajv/dist/2020")
 
@@ -21,7 +22,11 @@ type Props<T extends string> = {
 }
 
 export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
-  const { translations, onClose, onSubmit, rowHook, tableHook, getFields } = useRsi<T>()
+  const { translations, onClose, onSubmit, rowHook, tableHook } = useRsi<T>()
+  const {
+    getFields,
+  } = useFieldContext()
+
   let fields = getFields()
   const styles = useStyleConfig("ValidationStep") as typeof themeOverrides["components"]["ValidationStep"]["baseStyle"]
 
