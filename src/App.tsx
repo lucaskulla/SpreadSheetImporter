@@ -28,6 +28,7 @@ import merge from "lodash/merge"
 import { rtlThemeSupport } from "./theme"
 import { Providers } from "./components/Providers"
 import { useSchemaContext } from "./context/SchemaProvider"
+import { useFieldContext } from "./context/FieldProvider"
 
 
 export const Basic = () => {
@@ -51,7 +52,13 @@ export const Basic = () => {
 
   const {
     isSchemaUsed,
+    schemaToUse,
   } = useSchemaContext() // Use the context to get schema-related states and setters
+
+  const {
+    getFields,
+  } = useFieldContext()
+
 
   const handleEditor1Change = (value: string) => {
     const valueAsJSON = JSON.parse(value)
@@ -93,7 +100,7 @@ export const Basic = () => {
   }
 
   function uploadDataToAPI(): void {
-    const urn = localStorage.getItem("schemaToUse")
+    const urn = schemaToUse
 
     if (data && data["validData"]) {
       let errorThrown = false
@@ -144,9 +151,9 @@ export const Basic = () => {
 
   useEffect(() => {
     if (schemaRender) {
-      const fields = localStorage.getItem("fieldsList")
+      const fields = getFields()
       if (fields) {
-        const conversion = fieldsToJsonSchema(JSON.parse(fields), isSchemaUsed)
+        const conversion = fieldsToJsonSchema(fields, schemaToUse) //Wurde vorher als JSON.parse geparst
         setPreviewSchema(conversion)
         setEditor1Value(JSON.stringify(conversion, null, 4))
       }
@@ -154,10 +161,10 @@ export const Basic = () => {
   }, [schemaRender])
 
   function uploadNewSchemaToAPI(): void {
-    const fields = localStorage.getItem("fieldsList")
+    const fields = getFields()
     if (fields) {
-      let conversion = fieldsToJsonSchema(JSON.parse(fields), isSchemaUsed)
-      conversion["$id"] = localStorage.getItem("schemaName")
+      let conversion = fieldsToJsonSchema(fields, schemaToUse) //fields vorher als JSON.parse geparst
+      conversion["$id"] = schemaToUse
       console.log(JSON.stringify(conversion, null, 2), "conversion")
       apiClient
         .post("/schema", conversion)
@@ -176,22 +183,21 @@ export const Basic = () => {
   }
 
 
-  function saveDataFromEditor(dataEditor: string, changesInKeys: any): void {
+  function saveDataFromEditor(dataEditor: string, changesInKeys: any): string | null {
     const dataAsJSON = JSON.parse(dataEditor)
     setData(dataAsJSON)
     let changeKeyOriginial = false
     let changeKeyNew = false
 
-    const fieldsList = localStorage.getItem("fieldsList")
-    if (!fieldsList) return
+    let fieldsList = getFields()
+    if (!fieldsList) return null
 
-    let fieldsAsJSON = JSON.parse(fieldsList)
 
     const changesKeyInOriginal = changesInKeys[1]
     const changesKeyInNew = changesInKeys[3]
 
     if (changesKeyInOriginal.length > 0) {
-      fieldsAsJSON = fieldsAsJSON.filter((jsonObject: any) => !changesKeyInOriginal.includes(jsonObject.key))
+      fieldsList = fieldsList.filter((jsonObject: any) => !changesKeyInOriginal.includes(jsonObject.key))
       changeKeyOriginial = true
       toast({
         title: "Changes in the data detected, it appears that properties have been removed.",
@@ -205,7 +211,7 @@ export const Basic = () => {
     if (changesKeyInNew.length > 0) {
       changeKeyNew = true
       changesKeyInNew.forEach((key: string) => {
-        if (fieldsAsJSON.find((field: any) => field.key === key)) {
+        if (fieldsList.find((field: any) => field.key === key)) {
           console.log("Field already exists")
         } else {
           const fieldToAdd: Field<string> = {
@@ -219,7 +225,7 @@ export const Basic = () => {
             label: key,
             validations: [],
           }
-          fieldsAsJSON.push(fieldToAdd)
+          fieldsList.push(fieldToAdd)
         }
       })
 
@@ -232,27 +238,13 @@ export const Basic = () => {
       })
     }
 
-    localStorage.removeItem("fieldsList")
-    localStorage.setItem("fieldsList", JSON.stringify(fieldsAsJSON))
 
     if (changeKeyOriginial || changeKeyNew) {
       setIsOpenJsonEditor(true)
     }
+    return JSON.stringify(fieldsList) //TODO Kann zu problemem führen, davor stringify
   }
 
-
-  function removeOldStorage(): void {
-    localStorage.removeItem("fieldsList")
-    localStorage.removeItem("field")
-    localStorage.removeItem("schemaToUse")
-    localStorage.removeItem("schemaFromAPI")
-    localStorage.removeItem("newField")
-    localStorage.removeItem("schema")
-    localStorage.removeItem("fields")
-    localStorage.removeItem("schemaName")
-
-
-  }
 
   const props: RsiProps<any> = mockRsiValues
   const mergedTranslations =
@@ -270,7 +262,6 @@ export const Basic = () => {
           <Text fontSize="2xl" mb="4">1. Import and harmonize</Text>
           <Button
             onClick={() => {
-              removeOldStorage()
               onOpen()
             }}
             border="2px solid #7069FA"

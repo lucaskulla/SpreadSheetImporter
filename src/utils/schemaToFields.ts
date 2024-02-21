@@ -139,8 +139,6 @@ function jsonSchemaToFields(schema: JSONSchema): Fields<string> {
     processProperty(key, property, defs)
   }
 
-  localStorage.setItem("fieldsList", JSON.stringify(fieldsList))
-
   return fieldsList
 }
 

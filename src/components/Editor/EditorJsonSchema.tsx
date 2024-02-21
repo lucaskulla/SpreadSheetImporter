@@ -13,6 +13,7 @@ import React, { useCallback, useEffect, useState } from "react"
 import Editor from "@monaco-editor/react"
 import fieldsToJsonSchema from "../../utils/fieldsToSchema"
 import { useSchemaContext } from "../../context/SchemaProvider"
+import { useFieldContext } from "../../context/FieldProvider"
 
 type EditorModalProps = {
   isOpen: boolean;
@@ -32,7 +33,12 @@ const EditorModalJSONSchema = ({ isOpen, onClose, onSave }: EditorModalProps) =>
 
   const {
     isSchemaUsed,
+    schemaToUse,
   } = useSchemaContext()
+
+  const {
+    getFields,
+  } = useFieldContext()
 
   const handleEditor1Change = useCallback((value: any) => {
     setEditor1Value(value)
@@ -44,10 +50,10 @@ const EditorModalJSONSchema = ({ isOpen, onClose, onSave }: EditorModalProps) =>
   }, [editor1Value, onSave, onClose])
 
   useEffect(() => {
-    const fields = localStorage.getItem("fieldsList")
+    const fields = getFields()
 
     if (fields) {
-      const conversion = fieldsToJsonSchema(JSON.parse(fields), isSchemaUsed)
+      const conversion = fieldsToJsonSchema(fields, schemaToUse)
       setEditor1Value(JSON.stringify(conversion, null, 4))
     }
   }, [])

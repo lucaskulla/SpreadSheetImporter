@@ -22,6 +22,7 @@ import { Providers } from "./Providers"
 import { defaultTheme } from "../ReactSpreadsheetImport"
 import { mockRsiValues } from "../stories/mockRsiValues"
 import { translations } from "../translationsRSIProps"
+import { useSchemaContext } from "../context/SchemaProvider"
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -40,25 +41,32 @@ const UploadModal: React.FC<UploadModalProps> = ({
                                                  }) => {
   const [uploadData, setUploadData] = useState(false)
   const [uploadSchema, setUploadSchema] = useState(false)
-  const [schemaName, setSchemaNameLocal] = useState("")
+  // const [schemaName, setSchemaNameLocal] = useState("")
   const toast = useToast()
 
-  const isSchemaNameValid = (name: string) => {
+  const isSchemaNameValid = (name: string | undefined) => {
+    if (!name) return false
     const regex = /^urn:[a-zA-Z0-9]+:[a-zA-Z0-9]/
     return regex.test(name)
   }
 
+  const
+    {
+      schemaToUse,
+      setSchemaToUse,
+    }
+      = useSchemaContext()
+
   useEffect(() => {
 
-    const originalSchemaName = localStorage.getItem("schemaName")
-    if (originalSchemaName !== "urn:kaapana:newSchema:0.0.1") {
-      setSchemaNameLocal(originalSchemaName || "")
+    if (schemaToUse !== "urn:kaapana:newSchema:0.0.1") {
+      setSchemaName(schemaToUse || "")
     }
   }, [])
 
   const handleSubmit = () => {
-    if (uploadSchema) {
-      if (!isSchemaNameValid(schemaName)) {
+    if (uploadSchema && schemaToUse) {
+      if (!isSchemaNameValid(schemaToUse)) {
         toast({
           status: "error",
           variant: "left-accent",
@@ -69,9 +77,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
         })
         return
       }
-      setSchemaNameLocal(schemaName)
-      setSchemaName(schemaName)
-      localStorage.setItem("schemaName", schemaName)
+      setSchemaToUse(schemaToUse)
       onUploadSchema()
     }
     if (uploadData) {
@@ -112,12 +118,12 @@ const UploadModal: React.FC<UploadModalProps> = ({
               <Box my={4}>
                 <FormControl>
                   <Input
-                    value={schemaName}
-                    onChange={(e) => setSchemaNameLocal(e.target.value)}
+                    value={schemaToUse}
+                    onChange={(e) => setSchemaToUse(e.target.value)}
                     placeholder="Enter schema name"
-                    isInvalid={!isSchemaNameValid(schemaName)}
+                    isInvalid={!isSchemaNameValid(schemaToUse)}
                   />
-                  <FormHelperText>{isSchemaNameValid(schemaName) ? "Valid Schema Name" : "Invalid Schema Name"}</FormHelperText>
+                  <FormHelperText>{isSchemaNameValid(schemaToUse) ? "Valid Schema Name" : "Invalid Schema Name"}</FormHelperText>
                   <FormHelperText>Example: urn:namespace:schemaName</FormHelperText>
                 </FormControl>
               </Box>

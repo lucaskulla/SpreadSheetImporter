@@ -11,24 +11,22 @@ function incrementVersion(version: string): string {
   return parts.join(".")
 }
 
-function fieldsToJsonSchema(fields: Field<string>[], schemaUsed: boolean): JSONSchema {
+function fieldsToJsonSchema(fields: Field<string>[], schemaUsed: string | undefined): JSONSchema {
   let nextVersion = undefined
   let id = undefined
   if (schemaUsed) {
-    const stringToMatch = localStorage.getItem("schemaToUse")
 
-    if (stringToMatch) {
-      const versionRegex = /(\d+\.\d+\.\d+)/
-      const match = stringToMatch.match(versionRegex)
-      if (match) {
-        const version = match[1]
-        nextVersion = incrementVersion(version)
-      } else {
-        console.log("Version not found")
-      }
+    const versionRegex = /(\d+\.\d+\.\d+)/
+    const match = schemaUsed.match(versionRegex)
+    if (match) {
+      const version = match[1]
+      nextVersion = incrementVersion(version)
+    } else {
+      console.log("Version not found")
 
-      const versionIndex = stringToMatch.lastIndexOf(":") // find the last occurrence of ":"
-      id = stringToMatch.substring(0, versionIndex) // extract everything before the version
+
+      const versionIndex = schemaUsed.lastIndexOf(":") // find the last occurrence of ":"
+      id = schemaUsed.substring(0, versionIndex) // extract everything before the version
     }
   } else {
     id = "urn:kaapana:newschema"

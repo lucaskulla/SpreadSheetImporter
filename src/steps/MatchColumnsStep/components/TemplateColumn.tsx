@@ -68,8 +68,7 @@ export const TemplateColumn = <T extends string>({ column, onChange, onSubChange
 
 
   const handleFormSubmit = (inputValue: Field<string>) => {
-    localStorage.removeItem("fieldsList")
-    localStorage.setItem("fieldsList", JSON.stringify(getFields())) //TODO In ModalAddField wird inputValue in getFields gespeichert...
+    addField(inputValue) //schau ob es geklappt hat, davor über localstorage
   }
 
 
@@ -102,9 +101,6 @@ export const TemplateColumn = <T extends string>({ column, onChange, onSubChange
 
       // Ensure an "id" field exists
       addFieldIfMissing("id", "ID", "This id field is automatically generated")
-
-      // Optionally, update local storage with the latest fields list
-      localStorage.setItem("fieldsList", JSON.stringify(getFields()))
     }
   }
 

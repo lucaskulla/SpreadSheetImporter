@@ -44,6 +44,7 @@ export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
 
   const {
     isSchemaUsed,
+    selectedSchema,
   } = useSchemaContext() // Use the context to get schema-related states and setters
 
   const updateData = useCallback(
@@ -126,19 +127,14 @@ export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
     if (isSchemaUsed) {
 
       const ajv = new Ajv2020()
-      const schema = localStorage.getItem("schemaFromAPI")
+      const schema = selectedSchema
 
       if (schema) {
-        // @ts-ignore
-        const schemaParsed = JSON.parse(schema)
-
-        // @ts-ignore
-        //ajv.addKeyword(schemaParsed["$schema"])
         const draft7MetaSchema = require("ajv/dist/refs/json-schema-draft-07.json")
         ajv.addMetaSchema(draft7MetaSchema)
         ajv.addKeyword("metamodel_version")
         ajv.addKeyword("version")
-        const validate = ajv.compile(schemaParsed)
+        const validate = ajv.compile(schema)
         // Validate data against the schema
 
         for (let i = 0; i < all.length; i++) {
