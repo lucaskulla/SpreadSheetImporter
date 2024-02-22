@@ -75,7 +75,6 @@ export const Basic = () => {
 
   // Function to download data as a CSV file
   function downloadCSV(data: Data<string>[], fileName: string): void {
-    console.log(data, "fsjalf")
     if (data.length === 0) {
       errorToast("No data to download")
       return
@@ -88,10 +87,10 @@ export const Basic = () => {
   function handleDownloadButtonClick(fileName: string): void {
     try {
       if (data) {
-        console.log("Data avaiable", data)
+        console.log("Data available", data)
         downloadCSV(data[fileName], fileName + ".csv")
       } else {
-        console.log("Data not avaiable")
+        console.log("Data not available")
       }
     } catch (e) {
       errorToast("Error while downloading file, error message: " + e)
