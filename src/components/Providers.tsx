@@ -1,5 +1,5 @@
 import { ChakraProvider, extendTheme } from "@chakra-ui/react"
-import { createContext } from "react"
+import { createContext, ReactNode } from "react"
 import type { RsiProps } from "../types"
 import type { CustomTheme } from "../theme"
 import { useFieldContext } from "../context/FieldProvider"
@@ -7,7 +7,7 @@ import { useFieldContext } from "../context/FieldProvider"
 export const RsiContext = createContext({} as any)
 
 type ProvidersProps<T extends string> = {
-  children: React.ReactNode
+  children: ReactNode
   theme: CustomTheme
   rsiValues: RsiProps<T>
 }
