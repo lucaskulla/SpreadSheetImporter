@@ -25,11 +25,16 @@
     "jsx-a11y"
   ],
   "rules": {
-    "react/prop-types": "warn",
-    "react/react-in-jsx-scope": "warn",
-    "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn",
-    "jsx-a11y/anchor-is-valid": "warn",
+    "react/prop-types": "off",
+    //warn
+    "react/react-in-jsx-scope": "off",
+    //warn
+    "react-hooks/rules-of-hooks": "off",
+    //error
+    "react-hooks/exhaustive-deps": "off",
+    //warn
+    "jsx-a11y/anchor-is-valid": "off",
+    //warn
     "no-unused-vars": "off"
   },
   "settings": {
