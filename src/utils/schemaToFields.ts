@@ -37,7 +37,8 @@ function removeDuplicatesFromString(strings: string): string {
   const uniqueStrings = new Set<string>()
 
   for (const str of stringSplit) {
-    if (uniqueStrings.has(str)) { /* empty */
+    if (uniqueStrings.has(str)) {
+      continue
     }
     uniqueStrings.add(str)
   }
