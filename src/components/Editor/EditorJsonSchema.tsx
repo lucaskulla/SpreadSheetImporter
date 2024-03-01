@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react"
 import {
   Button,
   Flex,
@@ -9,7 +10,6 @@ import {
   ModalOverlay,
   Select,
 } from "@chakra-ui/react"
-import React, { useCallback, useEffect, useState } from "react"
 import Editor from "@monaco-editor/react"
 import fieldsToJsonSchema from "../../utils/fieldsToSchema"
 import { useSchemaContext } from "../../context/SchemaProvider"
@@ -27,71 +27,53 @@ const THEMES = {
 }
 
 const EditorModalJSONSchema = ({ isOpen, onClose, onSave }: EditorModalProps) => {
-  const [editor1Value, setEditor1Value] = useState("No schema avaiable")
-  const [theme, setTheme] = useState(THEMES.dark)
+  const [editorValue, setEditorValue] = useState("No schema available")
+  const [theme, setTheme] = useState<string>(THEMES.light)
 
-
-  const {
-    isSchemaUsed,
-    schemaToUse,
-  } = useSchemaContext()
-
-  const {
-    getFields,
-  } = useFieldContext()
-
-  const handleEditor1Change = useCallback((value: any) => {
-    setEditor1Value(value)
-  }, [])
-
-  const handleSave = useCallback(() => {
-    onSave(editor1Value)
-    onClose()
-  }, [editor1Value, onSave, onClose])
+  const { schemaToUse } = useSchemaContext()
+  const { getFields } = useFieldContext()
 
   useEffect(() => {
     const fields = getFields()
-
     if (fields) {
       const conversion = fieldsToJsonSchema(fields, schemaToUse)
-      setEditor1Value(JSON.stringify(conversion, null, 4))
+      setEditorValue(JSON.stringify(conversion, null, 4))
     }
-  }, [])
+  }, [getFields, schemaToUse])
 
-  const handleEditorValidation = useCallback((markers: any[]) => {
-    markers.forEach((marker) => console.log("onValidate:", marker.message))
-  }, [])
+  const handleThemeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newTheme = event.target.value
+    if (newTheme in THEMES) {
+      setTheme(THEMES[newTheme as keyof typeof THEMES])
+    } else {
+      console.error("Selected theme does not exist")
+    }
+  }
 
-  const onSaveAndSetEditor1Value = useCallback((dataEditorSchema: any) => {
-    setEditor1Value(dataEditorSchema)
-    onSave(dataEditorSchema)
-  }, [onSave])
+  const handleSave = () => {
+    onSave(editorValue)
+    onClose()
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="full">
-      <ModalOverlay style={{ backdropFilter: "blur(5px)", backgroundColor: "rgba(0, 0, 0, 0.4)" }} />
-      <ModalContent h="full" maxHeight="none">
-        <ModalHeader>Schema editor</ModalHeader>
-        <Select placeholder="Select theme" onChange={(e) => setTheme(e.target.value)}>
-          {Object.entries(THEMES).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader>Schema Editor</ModalHeader>
+        <ModalCloseButton />
+        <Select placeholder="Select theme" value={theme} onChange={handleThemeChange} mb={4}>
+          {Object.entries(THEMES).map(([key, value]) => (
+            <option key={key} value={value}>{value}</option>
           ))}
         </Select>
-        <ModalCloseButton />
-        <Flex justifyContent="flex-end" p={4}>
-          <Button onClick={onSaveAndSetEditor1Value}>Save</Button>
-        </Flex>
-        <ModalBody flex="1" display="flex">
+        <ModalBody>
           <Editor
-            height="100%"
+            height="90vh"
             width="100%"
             language="JSON"
             theme={theme}
-            value={editor1Value}
-            onChange={handleEditor1Change}
-            onValidate={handleEditorValidation}
+            value={editorValue}
+            onChange={(value) => setEditorValue(value ?? "")}
             options={{
               selectOnLineNumbers: true,
               roundedSelection: false,
@@ -100,6 +82,10 @@ const EditorModalJSONSchema = ({ isOpen, onClose, onSave }: EditorModalProps) =>
               automaticLayout: true,
             }}
           />
+
+          <Flex justifyContent="flex-end" mt={4}>
+            <Button colorScheme="blue" onClick={handleSave}>Save</Button>
+          </Flex>
         </ModalBody>
       </ModalContent>
     </Modal>

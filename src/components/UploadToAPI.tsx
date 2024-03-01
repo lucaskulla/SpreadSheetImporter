@@ -27,9 +27,8 @@ import { useSchemaContext } from "../context/SchemaProvider"
 interface UploadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUploadData: () => void;
-  onUploadSchema: () => void;
-  setSchemaName: (name: string) => void;
+  onUploadData: () => Promise<void>;
+  onUploadSchema: () => Promise<void>;
 }
 
 const UploadModal: React.FC<UploadModalProps> = ({
@@ -37,7 +36,6 @@ const UploadModal: React.FC<UploadModalProps> = ({
                                                    onClose,
                                                    onUploadData,
                                                    onUploadSchema,
-                                                   setSchemaName,
                                                  }) => {
   const [uploadData, setUploadData] = useState(false)
   const [uploadSchema, setUploadSchema] = useState(false)
@@ -60,7 +58,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
   useEffect(() => {
 
     if (schemaToUse !== "urn:kaapana:newSchema:0.0.1") {
-      setSchemaName(schemaToUse || "")
+      setSchemaToUse(schemaToUse || "")
     }
   }, [])
 
@@ -78,10 +76,10 @@ const UploadModal: React.FC<UploadModalProps> = ({
         return
       }
       setSchemaToUse(schemaToUse)
-      onUploadSchema()
+      onUploadSchema().then(r => console.log(r)).catch(e => console.error(e))
     }
     if (uploadData) {
-      onUploadData()
+      onUploadData().then(r => console.log(r)).catch(e => console.error(e))
     }
 
     onClose()

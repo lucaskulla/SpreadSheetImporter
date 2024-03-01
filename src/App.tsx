@@ -10,17 +10,11 @@ import {
   ModalOverlay,
   Text,
   useDisclosure,
-  useToast,
 } from "@chakra-ui/react"
 import { mockRsiValues } from "./stories/mockRsiValues"
-import React, { useCallback, useEffect, useState } from "react"
-import type { Data } from "./types"
-import { Field, RsiProps } from "./types"
-import { saveAs } from "file-saver"
-import fieldsToJsonSchema from "./utils/fieldsToSchema"
-import apiClient from "./api/apiClient"
+import React, { useState } from "react"
+import { RsiProps } from "./types"
 import EditorModal from "./components/Editor/EditorModal"
-import { JSONSchema7 } from "json-schema"
 import EditorModalJSONSchema from "./components/Editor/EditorJsonSchema"
 import UploadModal from "./components/UploadToAPI"
 import { translations } from "./translationsRSIProps"
@@ -29,227 +23,12 @@ import { rtlThemeSupport } from "./theme"
 import { Providers } from "./components/Providers"
 import { useSchemaContext } from "./context/SchemaProvider"
 import { useFieldContext } from "./context/FieldProvider"
+import { handleDownloadButtonClick } from "./utils/csvHanlder"
+import { useApi } from "./utils/apiHandler"
+import { saveDataFromEditor } from "./utils/editorHandler"
 
 
 export const Basic = () => {
-  const [data, setData] = useState<any>(null)
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const { isOpen: isEditorOpen, onOpen: onOpenEditor, onClose: onCloseEditor } = useDisclosure()
-  const [showPreview, setShowPreview] = useState(false)
-  const [previewSchema, setPreviewSchema] = useState<JSONSchema7>()
-
-  const [isOpenJsonEditor, setIsOpenJsonEditor] = useState(false)
-  const [schemaRender, setSchemaRender] = useState(false)
-
-  const toast = useToast()
-
-  const [editor1Value, setEditor1Value] = useState("// After import of data the data is displayed here")
-
-
-  const [uploadModalOpen, setUploadModalOpen] = useState(false)
-
-  const [schemaName, setSchemaName] = useState("urn:kaapana:newSchema:0.0.1")
-
-  const {
-    isSchemaUsed,
-    schemaToUse,
-  } = useSchemaContext() // Use the context to get schema-related states and setters
-
-  const {
-    getFields,
-  } = useFieldContext()
-
-
-  const handleEditor1Change = (value: string) => {
-    const valueAsJSON = JSON.parse(value)
-    console.log(valueAsJSON)
-    setEditor1Value(valueAsJSON)
-  }
-
-  function convertToCSV(data: Data<string>[]): string {
-    const header = Object.keys(data[0]).join(",")
-    const rows = data.map((row) => Object.values(row).join(",")).join("\n")
-
-    return `${header}\n${rows}`
-  }
-
-  // Function to download data as a CSV file
-  function downloadCSV(data: Data<string>[], fileName: string): void {
-    if (data.length === 0) {
-      errorToast("No data to download")
-      return
-    }
-    const csvData = convertToCSV(data)
-    const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" })
-    saveAs(blob, fileName)
-  }
-
-  function handleDownloadButtonClick(fileName: string): void {
-    try {
-      if (data) {
-        console.log("Data available", data)
-        downloadCSV(data[fileName], fileName + ".csv")
-      } else {
-        console.log("Data not available")
-      }
-    } catch (e) {
-      errorToast("Error while downloading file, error message: " + e)
-    }
-
-  }
-
-  function uploadDataToAPI(): void {
-    const urn = schemaToUse
-
-    if (data && data["validData"]) {
-      let errorThrown = false
-      data["validData"].forEach((item: any) => {
-        // Send a POST request for each item
-        apiClient
-          .post("/object/" + urn, item, { params: { skip_validation: true } })
-          .then((response: any) => {
-            console.log(`Data uploaded successfully for item: ${JSON.stringify(item)}`)
-          })
-          .catch((error: any) => {
-            console.error(`Error occurred while uploading data for item: ${JSON.stringify(item)}`)
-            console.error(error)
-            if (!errorThrown) {
-              const errorMessage = error.message || "An unexpected error occurred"
-              errorToast(errorMessage)
-              errorThrown = true
-            }
-          })
-      })
-      if (!errorThrown) {
-        toast({
-          title: "Upload successful.",
-          description: "Your data have been successfully uploaded.",
-          status: "success",
-          duration: 5000,
-          isClosable: true,
-        })
-      }
-      errorThrown = false
-
-    }
-  }
-
-  const errorToast = useCallback(
-    (description: string) => {
-      toast({
-        status: "error",
-        variant: "left-accent",
-        position: "bottom-left",
-        title: "Upload / Download failed",
-        description: description,
-        isClosable: true,
-      })
-    },
-    [toast],
-  )
-
-  useEffect(() => {
-    if (schemaRender) {
-      const fields = getFields()
-      if (fields) {
-        const conversion = fieldsToJsonSchema(fields, schemaToUse) //Wurde vorher als JSON.parse geparst
-        setPreviewSchema(conversion)
-        setEditor1Value(JSON.stringify(conversion, null, 4))
-      }
-    }
-  }, [schemaRender])
-
-  function uploadNewSchemaToAPI(): void {
-    const fields = getFields()
-    if (fields) {
-      let conversion = fieldsToJsonSchema(fields, schemaToUse) //fields vorher als JSON.parse geparst
-      conversion["$id"] = schemaToUse
-
-
-      if (!conversion["version"]) {
-        conversion["version"] = "0.0.1"
-      }
-
-      console.log(JSON.stringify(conversion, null, 2), "conversion")
-      apiClient
-        .post("/schema", conversion)
-        .then((r: any) => toast({
-          title: "Upload successful.",
-          description: "Your schema have been successfully uploaded.",
-          status: "success",
-          duration: 5000,
-          isClosable: true,
-        }))
-        .catch((e: { message: string }) => {
-          const errorMessage = e.message || "An unexpected error occurred"
-          errorToast(errorMessage)
-        })
-    }
-  }
-
-
-  function saveDataFromEditor(dataEditor: string, changesInKeys: any): string | null {
-    const dataAsJSON = JSON.parse(dataEditor)
-    setData(dataAsJSON)
-    let changeKeyOriginial = false
-    let changeKeyNew = false
-
-    let fieldsList = getFields()
-    if (!fieldsList) return null
-
-
-    const changesKeyInOriginal = changesInKeys[1]
-    const changesKeyInNew = changesInKeys[3]
-
-    if (changesKeyInOriginal.length > 0) {
-      fieldsList = fieldsList.filter((jsonObject: any) => !changesKeyInOriginal.includes(jsonObject.key))
-      changeKeyOriginial = true
-      toast({
-        title: "Changes in the data detected, it appears that properties have been removed.",
-        description: "The fields list has been updated",
-        status: "info",
-        duration: 5000,
-        isClosable: true,
-      })
-    }
-
-    if (changesKeyInNew.length > 0) {
-      changeKeyNew = true
-      changesKeyInNew.forEach((key: string) => {
-        if (fieldsList.find((field: any) => field.key === key)) {
-          console.log("Field already exists")
-        } else {
-          const fieldToAdd: Field<string> = {
-            alternateMatches: [key],
-            description: "This field element is automatically generated after changes in the data",
-            example: "",
-            fieldType: {
-              type: "input",
-            },
-            key: key,
-            label: key,
-            validations: [],
-          }
-          fieldsList.push(fieldToAdd)
-        }
-      })
-
-      toast({
-        title: "Changes in the data detected, it appears that properties have been added.",
-        description: "The fields list has been updated",
-        status: "info",
-        duration: 5000,
-        isClosable: true,
-      })
-    }
-
-
-    if (changeKeyOriginial || changeKeyNew) {
-      setIsOpenJsonEditor(true)
-    }
-    return JSON.stringify(fieldsList) //TODO Kann zu problemem führen, davor stringify
-  }
-
 
   const props: RsiProps<any> = mockRsiValues
   const mergedTranslations =
@@ -259,6 +38,37 @@ export const Basic = () => {
   const mergedThemes = props.rtl
     ? merge(defaultTheme, rtlThemeSupport, props.customTheme)
     : merge(defaultTheme, props.customTheme)
+
+
+  const [data, setData] = useState<any>(null)
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { isOpen: isEditorOpen, onOpen: onOpenEditor, onClose: onCloseEditor } = useDisclosure()
+
+  const [isOpenJsonEditor, setIsOpenJsonEditor] = useState(false)
+
+  const [uploadModalOpen, setUploadModalOpen] = useState(false)
+
+
+  const {
+    schemaToUse,
+  } = useSchemaContext() // Use the context to get schema-related states and setters
+
+  const {
+    getFields,
+  } = useFieldContext()
+
+  const { uploadDataToAPI, uploadNewSchemaToAPI } = useApi()
+
+
+  const onUploadData = uploadDataToAPI(data, schemaToUse)
+  const onUploadSchema = uploadNewSchemaToAPI(schemaToUse, getFields())
+
+
+  const handleEditorChange = (value: string) => {
+    const valueAsJSON = JSON.parse(value)
+    console.log(valueAsJSON)
+  }
+
 
   return (
     <Providers theme={mergedThemes} rsiValues={{ ...props, translations: mergedTranslations }}>
@@ -298,7 +108,7 @@ export const Basic = () => {
             </Button>
 
             <EditorModalJSONSchema isOpen={isOpenJsonEditor} onClose={() => setIsOpenJsonEditor(false)}
-                                   onSave={handleEditor1Change} />
+                                   onSave={handleEditorChange} />
             <Modal isOpen={isEditorOpen} onClose={onCloseEditor} motionPreset="slideInBottom">
               <ModalOverlay style={{ backdropFilter: "blur(5px)", backgroundColor: "rgba(0, 0, 0, 0.4)" }} />
               <ModalContent>
@@ -324,7 +134,7 @@ export const Basic = () => {
             <Text fontSize="2xl" mb="4">3. Export the data</Text>
             <Box display="flex" gap="16px">
               <Button
-                onClick={() => handleDownloadButtonClick("all")}
+                onClick={() => handleDownloadButtonClick("all", data)}
                 p="8px"
                 border="2px solid #718096"
                 borderRadius="8px"
@@ -332,7 +142,7 @@ export const Basic = () => {
                 Download data as .csv
               </Button>
               <Button
-                onClick={() => handleDownloadButtonClick("invalidData")}
+                onClick={() => handleDownloadButtonClick("invalidData", data)}
                 p="8px"
                 border="2px solid #718096"
                 borderRadius="8px"
@@ -350,9 +160,8 @@ export const Basic = () => {
               <UploadModal
                 isOpen={uploadModalOpen}
                 onClose={() => setUploadModalOpen(false)}
-                onUploadData={uploadDataToAPI}
-                onUploadSchema={uploadNewSchemaToAPI}
-                setSchemaName={setSchemaName}
+                onUploadData={onUploadData}
+                onUploadSchema={onUploadSchema}
               />
 
             </Box>
