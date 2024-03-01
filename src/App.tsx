@@ -106,7 +106,7 @@ export const Basic = () => {
       data["validData"].forEach((item: any) => {
         // Send a POST request for each item
         apiClient
-          .post("/object/" + urn, item, { params: { skip_validation: false } })
+          .post("/object/" + urn, item, { params: { skip_validation: true } })
           .then((response: any) => {
             console.log(`Data uploaded successfully for item: ${JSON.stringify(item)}`)
           })
@@ -164,6 +164,12 @@ export const Basic = () => {
     if (fields) {
       let conversion = fieldsToJsonSchema(fields, schemaToUse) //fields vorher als JSON.parse geparst
       conversion["$id"] = schemaToUse
+
+
+      if (!conversion["version"]) {
+        conversion["version"] = "0.0.1"
+      }
+
       console.log(JSON.stringify(conversion, null, 2), "conversion")
       apiClient
         .post("/schema", conversion)

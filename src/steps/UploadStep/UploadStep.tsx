@@ -105,7 +105,7 @@ export const UploadStep = ({ onContinue }: UploadProps) => {
       return // Do not fetch options if the checkbox is unchecked
     }
     try {
-      const response = await apiClient.get("/schema", { params: { include_version: true } })
+      const response = await apiClient.get("/schema/", { params: { include_version: true } })
       if (Array.isArray(response.data)) {
         setFetchedOptions(response.data.map((item) => ({ value: item, label: item })))
       } else {

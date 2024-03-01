@@ -24,44 +24,44 @@ export const DropZone = ({ onContinue, isLoading }: DropZoneProps) => {
     maxFiles: 1,
     maxSize: maxFileSize,
     accept: {
-      'text/csv': ['.csv'],
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
-      'application/vnd.ms-excel': ['.xls'],
+      "text/csv": [".csv"],
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+      "application/vnd.ms-excel": [".xls"],
     },
     onDropRejected: (fileRejections) => {
-      setLoading(false);
+      setLoading(false)
       fileRejections.forEach((fileRejection) => {
         toast({
-          status: 'error',
-          variant: 'left-accent',
-          position: 'bottom-left',
+          status: "error",
+          variant: "left-accent",
+          position: "bottom-left",
           title: `${fileRejection.file.name} ${translations.uploadStep.dropzone.errorToastDescription}`,
           description: fileRejection.errors[0].message,
           isClosable: true,
-        });
-      });
+        })
+      })
     },
     onDrop: async ([file]) => {
-      setLoading(true);
+      setLoading(true)
       try {
-        const arrayBuffer = await readFileAsync(file);
-        const workbook = XLSX.read(arrayBuffer, { cellDates: true, dateNF: dateFormat, raw: parseRaw });
-        onContinue(workbook);
+        const arrayBuffer = await readFileAsync(file)
+        const workbook = XLSX.read(arrayBuffer, { cellDates: true, dateNF: dateFormat, raw: parseRaw })
+        onContinue(workbook)
       } catch (error) {
-        console.error('Error processing file:', error);
+        console.error("Error processing file:", error)
         toast({
-          status: 'error',
-          variant: 'left-accent',
-          position: 'bottom-left',
-          title: 'Error processing file',
+          status: "error",
+          variant: "left-accent",
+          position: "bottom-left",
+          title: "Error processing file",
           description: (error as Error).toString(),
           isClosable: true,
-        });
+        })
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     },
-  });
+  })
 
 
   return (
