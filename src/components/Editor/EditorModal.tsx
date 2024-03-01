@@ -146,6 +146,8 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
                   readOnly: false,
                   cursorStyle: "line",
                   automaticLayout: true,
+                  colorDecorators: true,
+
                 }}
               />
               <div>
@@ -162,6 +164,8 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
                     readOnly: false,
                     cursorStyle: "line",
                     automaticLayout: true,
+                    colorDecorators: true,
+
                   }}
                 />
                 <Box display="flex" justifyContent="center" mt={4}>
@@ -182,13 +186,14 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
                     readOnly: false,
                     cursorStyle: "line",
                     automaticLayout: true,
+                    colorDecorators: true,
                   }}
                 />
               </div>
               <Editor
                 height="100%"
                 width="100%"
-                language={"JavaScript"}
+                language={"JSON"}
                 theme={theme}
                 defaultValue={editorRightValue}
                 value={editorRightValue}
@@ -198,6 +203,7 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
                   readOnly: true,
                   cursorStyle: "line",
                   automaticLayout: true,
+                  colorDecorators: true,
                 }}
               />
             </Grid>

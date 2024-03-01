@@ -66,6 +66,9 @@ const EditorModalJSONSchema = ({ isOpen, onClose, onSave }: EditorModalProps) =>
             <option key={key} value={value}>{value}</option>
           ))}
         </Select>
+        <Flex justifyContent="flex-end" mt={4}>
+          <Button colorScheme="blue" onClick={handleSave}>Save</Button>
+        </Flex>
         <ModalBody>
           <Editor
             height="90vh"
@@ -83,9 +86,7 @@ const EditorModalJSONSchema = ({ isOpen, onClose, onSave }: EditorModalProps) =>
             }}
           />
 
-          <Flex justifyContent="flex-end" mt={4}>
-            <Button colorScheme="blue" onClick={handleSave}>Save</Button>
-          </Flex>
+
         </ModalBody>
       </ModalContent>
     </Modal>
