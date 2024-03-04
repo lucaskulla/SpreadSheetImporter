@@ -21,7 +21,6 @@ import type { themeOverrides } from "../../theme"
 type EditorModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (dataEditor: string) => void;
 };
 
 const THEMES = {
@@ -29,11 +28,11 @@ const THEMES = {
   dark: "vs-dark",
 }
 
-const EditorModalJSONSchema = ({ isOpen, onClose, onSave }: EditorModalProps) => {
+const EditorModalJSONSchema = ({ isOpen, onClose }: EditorModalProps) => {
   const [editorValue, setEditorValue] = useState("No schema available")
   const [theme, setTheme] = useState<string>(THEMES.light)
 
-  const { schemaToUse } = useSchemaContext()
+  const { schemaToUse, setSelectedSchema } = useSchemaContext()
   const { getFields } = useFieldContext()
 
   useEffect(() => {
@@ -54,7 +53,7 @@ const EditorModalJSONSchema = ({ isOpen, onClose, onSave }: EditorModalProps) =>
   }
 
   const handleSave = () => {
-    onSave(editorValue)
+    setSelectedSchema(JSON.parse(editorValue))
     onClose()
   }
 

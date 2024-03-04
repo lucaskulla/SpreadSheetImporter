@@ -40,7 +40,7 @@ function fieldsToJsonSchema(fields: Field<string>[], schemaUsed: string | undefi
     $schema: "http://json-schema.org/draft-07/schema#",
     additionalProperties: true,
     metamodel_version2: "1.7.0",
-    required: ["id"], //ToDO check with Philipp
+    required: ["id"],
     version: nextVersion,
   }
 
@@ -75,7 +75,7 @@ function fieldsToJsonSchema(fields: Field<string>[], schemaUsed: string | undefi
         }
       } else {
         if (!currentObject.properties[propertyName]) {
-          const definitionName = propertyName //TODO: check name that is liked e.g. +def
+          const definitionName = propertyName
           schema.$defs[definitionName] = {
             type: "object",
             properties: {},
@@ -87,8 +87,7 @@ function fieldsToJsonSchema(fields: Field<string>[], schemaUsed: string | undefi
 
           currentObject = schema.$defs[definitionName]
         } else {
-          const definitionName = propertyName //TODO: check name that is liked e.g. +def
-          currentObject = schema.$defs[definitionName]
+          currentObject = schema.$defs[propertyName]
         }
       }
     }

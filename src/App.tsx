@@ -64,12 +64,6 @@ export const Basic = () => {
   const onUploadSchema = uploadNewSchemaToAPI(schemaToUse, getFields())
 
 
-  const handleEditorChange = (value: string) => { //TODO Decide if I need this anymore?
-    const valueAsJSON = JSON.parse(value)
-    console.log(valueAsJSON)
-  }
-
-
   return (
     <Providers theme={mergedThemes} rsiValues={{ ...props, translations: mergedTranslations }}>
       <>
@@ -108,7 +102,7 @@ export const Basic = () => {
             </Button>
 
             <EditorModalJSONSchema isOpen={isOpenJsonEditor} onClose={() => setIsOpenJsonEditor(false)}
-                                   onSave={handleEditorChange} />
+            />
             <Modal isOpen={isEditorOpen} onClose={onCloseEditor} motionPreset="slideInBottom">
               <ModalOverlay style={{ backdropFilter: "blur(5px)", backgroundColor: "rgba(0, 0, 0, 0.4)" }} />
               <ModalContent>

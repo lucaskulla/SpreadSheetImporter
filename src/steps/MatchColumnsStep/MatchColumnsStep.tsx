@@ -8,7 +8,7 @@ import { setColumn } from "./utils/setColumn"
 import { setIgnoreColumn } from "./utils/setIgnoreColumn"
 import { setSubColumn } from "./utils/setSubColumn"
 import { normalizeTableData } from "./utils/normalizeTableData"
-import type { Field, Fields, RawData } from "../../types"
+import type { Field, RawData } from "../../types"
 import { getMatchedColumns } from "./utils/getMatchedColumns"
 import { UnmatchedFieldsAlert } from "../../components/Alerts/UnmatchedFieldsAlert"
 import { findUnmatchedRequiredFields } from "./utils/findUnmatchedRequiredFields"
@@ -188,29 +188,21 @@ export const MatchColumnsStep = <T extends string>({ data, headerValues, onConti
   }, [fields])
 
 
-  const addMissingFieldsFromHeader = async (fields: Fields<string>) => {
-    if (isSchemaUsed) {
-      if (convertedSchema === undefined) {
-        console.log("Schema is undefined")
-      } else {
-        for (let i = 0; i < convertedSchema.length; i++) {
-          if (convertedSchema) {
-            addField(convertedSchema[i])
-          } else {
-            console.log("No schema available - ATTENTION!")
-          }
-        }
-        setFieldsAdded(true)
-      }
-      toast(
-        {
-          title: "Schema used, the field id is mandatory, please map it", //TODO find all the fields that are mandatory
-          status: "info",
-          duration: 9000,
-          isClosable: true,
-        },
-      )
+  const addMissingFieldsFromHeader = async () => {
+    if (!isSchemaUsed) return
+
+    if (convertedSchema === undefined) {
+      console.log("Schema is undefined")
+      return // Early return if schema is not defined
     }
+
+    // Iterate over convertedSchema if it's defined
+    convertedSchema.forEach(schemaItem => {
+      console.log(schemaItem)
+      addField(schemaItem)
+    })
+
+    setFieldsAdded(true)
   }
 
 
@@ -218,7 +210,7 @@ export const MatchColumnsStep = <T extends string>({ data, headerValues, onConti
 
   useEffect(() => {
     if (!fieldsAdded) {
-      addMissingFieldsFromHeader(getFields())
+      addMissingFieldsFromHeader()
         .then(() => setFieldsAdded(true))
         .catch((error) => console.error("Error adding missing fields:", error))
     }

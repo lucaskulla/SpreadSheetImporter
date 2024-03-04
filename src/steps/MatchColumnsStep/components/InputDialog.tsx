@@ -19,8 +19,6 @@ import { useFieldContext } from "../../../context/FieldProvider"
 import { schemaField } from "../utils/schemaField"
 import { uiSchema } from "./schemaDialog"
 
-//TODO Ende Validierung
-//TODO Post der Daten ggf. 5 Seite erstellen
 
 interface ModalProps {
   isOpen: boolean
@@ -52,16 +50,14 @@ const ModalAddField: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, column
     const { formData } = data
     //This if is needed because officially FieldType is an array, however, in the schema above it is just an enum, because it is easier to display. Here is the array created
     if (typeof formData.fieldType === "string") {
-      console.log("HUI")
       formData.fieldType = { type: formData.fieldType }
     }
-    console.log("TUP")
 
 
     const fieldData: Field<string> = formData
     addField(fieldData)
     onSubmit(fieldData)
-    setCreateNewField(false) //TODO decide if needed
+    setCreateNewField(false)
     onClose()
   }
 

@@ -7,6 +7,7 @@ type JSONSchema = {
 let fieldsList: Fields<string> = []
 
 function createValidations(property: JSONSchema): Validation[] {
+  console.log("Add validation")
   const validations: Validation[] = []
 
   if (property.required) {
@@ -24,6 +25,8 @@ function createValidations(property: JSONSchema): Validation[] {
     }
     validations.push(regexValidation)
   }
+
+  console.log(validations)
 
   return validations
 }
@@ -139,6 +142,20 @@ function jsonSchemaToFields(schema: JSONSchema): Fields<string> {
     const property = properties[key]
     processProperty(key, property, defs)
   }
+
+
+  const requiredFields = schema["required"] || []
+
+  if (requiredFields.length > 0) {
+    fieldsList = fieldsList.map((field) => {
+      if (requiredFields.includes(field.key)) {
+        field.validations = field.validations || []
+        field.validations.push({ rule: "required" })
+      }
+      return field
+    })
+  }
+
 
   return fieldsList
 }

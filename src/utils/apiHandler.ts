@@ -8,7 +8,7 @@ import { Data, Fields } from "../types"
 export const useApi = () => {
   const toast = useToast()
 
-  const [schemaUploadScuccess, setSchemaUploadSuccess] = useState(false)
+  const [schemaUploadSuccess, setSchemaUploadSuccess] = useState(true)
 
   const errorToast = useCallback((description: string) => {
     toast({
@@ -22,8 +22,8 @@ export const useApi = () => {
   }, [toast])
 
   const uploadDataToAPI = useCallback((data: Data<any>[] | Data<any>, schemaToUse: string | undefined) => async () => {
-    console.log(schemaUploadScuccess)
-    if (!schemaUploadScuccess) return
+    console.log(schemaUploadSuccess)
+    if (!schemaUploadSuccess) return
     try {
       console.log("Upload Data with schema: " + schemaToUse)
 
@@ -76,7 +76,6 @@ export const useApi = () => {
       conversion["version"] = conversion["version"] || "0.0.1"
 
       await apiClient.post("/schema", conversion)
-      setSchemaUploadSuccess(true)
       toast({
         title: "Upload successful.",
         description: "Your schema has been successfully uploaded.",
