@@ -38,8 +38,12 @@ class ApiClient {
   }
 }
 
-const baseURL: string = getEnvVar("REACT_APP_API_BASE_URL")
-if (!baseURL) throw new Error("REACT_APP_API_BASE_URL environment variable is not set")
+const envBaseUrl: string = getEnvVar("REACT_APP_API_BASE_URL")
+// Determine the base URL: Use the environment variable if available, otherwise, construct it for production.
+const baseURL = envBaseUrl || `${window.location.protocol}//${window.location.host}/persistence/api`
+
+console.log("Using API base URL:", baseURL)
+
 const apiClient = new ApiClient(baseURL)
 
 
