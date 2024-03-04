@@ -32,7 +32,9 @@ interface UploadModalProps {
 const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onUploadData, onUploadSchema }) => {
   const [uploadData, setUploadData] = useState(false)
   const [uploadSchema, setUploadSchema] = useState(false)
+  const [uploadOngoing, setUploadOngoing] = useState(false)
   const { schemaToUse, setSchemaToUse } = useSchemaContext()
+
 
   const isSchemaNameValid = useCallback((name: string) => {
     const regex = /^urn:[a-zA-Z0-9]+:[a-zA-Z0-9]/
@@ -40,6 +42,7 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onUploadData
   }, [])
 
   const handleSubmit = async () => {
+    setUploadOngoing(true) // Start loading indication
     try {
       if (uploadSchema && schemaToUse) {
         await onUploadSchema()
@@ -52,6 +55,7 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onUploadData
     } catch (error) {
       console.error(error)
     } finally {
+      setUploadOngoing(false) // Stop loading indication regardless of outcome
       onClose() // Ensure modal closure happens after all operations
     }
   }
@@ -94,7 +98,7 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onUploadData
             )}
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue" onClick={handleSubmit} mr={3}>
+            <Button colorScheme="blue" onClick={handleSubmit} mr={3} isLoading={uploadOngoing}>
               Submit
             </Button>
             <Button variant="ghost" onClick={onClose}>Cancel</Button>
