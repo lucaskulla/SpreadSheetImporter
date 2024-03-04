@@ -32,11 +32,16 @@ export const Basic = () => {
 
   const props: RsiProps<any> = mockRsiValues
   const mergedTranslations =
+    // eslint-disable-next-line react/prop-types
     props.translations !== translations
+      // eslint-disable-next-line react/prop-types
       ? merge(translations, props.translations)
       : translations
+  // eslint-disable-next-line react/prop-types
   const mergedThemes = props.rtl
+    // eslint-disable-next-line react/prop-types
     ? merge(defaultTheme, rtlThemeSupport, props.customTheme)
+    // eslint-disable-next-line react/prop-types
     : merge(defaultTheme, props.customTheme)
 
 
@@ -157,7 +162,6 @@ export const Basic = () => {
                 onUploadData={onUploadData}
                 onUploadSchema={onUploadSchema}
               />
-
             </Box>
           </Box>
         )}
