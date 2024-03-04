@@ -6,6 +6,7 @@ type JSONSchema = {
 
 let fieldsList: Fields<string> = []
 
+
 function createValidations(property: JSONSchema): Validation[] {
   console.log("Add validation")
   const validations: Validation[] = []
@@ -29,6 +30,36 @@ function createValidations(property: JSONSchema): Validation[] {
   console.log(validations)
 
   return validations
+}
+
+function addRequiredValidationFromSchema(requiredFields: string[]): Field<string>[] | undefined {
+  if (requiredFields.length === 0) {
+    return undefined
+  }
+
+  const updatedFieldsList: Field<string>[] = fieldsList.slice() // Clone to avoid direct modification
+
+  requiredFields.forEach(requiredField => {
+    const index = updatedFieldsList.findIndex(field => field.key.toLowerCase() === requiredField.toLowerCase())
+    if (index !== -1) {
+      // Field exists, add required validation
+      updatedFieldsList[index].validations = updatedFieldsList[index].validations || []
+      if (updatedFieldsList[index].validations !== undefined) {
+        // @ts-ignore
+        updatedFieldsList[index].validations.push({ rule: "required" })
+      }
+    } else {
+      // Field does not exist, add it manually
+      updatedFieldsList.push({
+        label: requiredField, // Assuming label is same as key for new fields, adjust as necessary
+        key: requiredField,
+        fieldType: { type: "input" },
+        validations: [{ rule: "required" }],
+      })
+    }
+  })
+
+  return updatedFieldsList
 }
 
 function createAlternateMatches(property: JSONSchema): string[] | undefined {
@@ -146,16 +177,16 @@ function jsonSchemaToFields(schema: JSONSchema): Fields<string> {
 
   const requiredFields = schema["required"] || []
 
-  if (requiredFields.length > 0) {
-    fieldsList = fieldsList.map((field) => {
-      if (requiredFields.includes(field.key)) {
-        field.validations = field.validations || []
-        field.validations.push({ rule: "required" })
-      }
-      return field
-    })
+
+  const fieldsAndRequiredFields = addRequiredValidationFromSchema(requiredFields)
+
+  if (fieldsAndRequiredFields) {
+    console.log(fieldsAndRequiredFields, "fieldsAndRequiredFields")
+    return fieldsAndRequiredFields
   }
 
+
+  console.log(fieldsList)
 
   return fieldsList
 }
