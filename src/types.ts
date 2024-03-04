@@ -3,6 +3,7 @@ import type { TranslationsRSIProps } from "./translationsRSIProps"
 import type { Columns } from "./steps/MatchColumnsStep/MatchColumnsStep"
 import type { StepState } from "./steps/UploadFlow"
 
+
 export type RsiProps<T extends string> = {
   // Is modal visible.
   isOpen: boolean

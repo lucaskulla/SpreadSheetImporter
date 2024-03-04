@@ -64,7 +64,7 @@ export const Basic = () => {
   const onUploadSchema = uploadNewSchemaToAPI(schemaToUse, getFields())
 
 
-  const handleEditorChange = (value: string) => {
+  const handleEditorChange = (value: string) => { //TODO Decide if I need this anymore?
     const valueAsJSON = JSON.parse(value)
     console.log(valueAsJSON)
   }

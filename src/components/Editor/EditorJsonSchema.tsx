@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react"
 import {
   Button,
   Flex,
+  Heading,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -9,11 +10,13 @@ import {
   ModalHeader,
   ModalOverlay,
   Select,
+  useStyleConfig,
 } from "@chakra-ui/react"
 import Editor from "@monaco-editor/react"
 import fieldsToJsonSchema from "../../utils/fieldsToSchema"
 import { useSchemaContext } from "../../context/SchemaProvider"
 import { useFieldContext } from "../../context/FieldProvider"
+import type { themeOverrides } from "../../theme"
 
 type EditorModalProps = {
   isOpen: boolean;
@@ -55,11 +58,16 @@ const EditorModalJSONSchema = ({ isOpen, onClose, onSave }: EditorModalProps) =>
     onClose()
   }
 
+  const styles = useStyleConfig("MatchColumnsStep") as typeof themeOverrides["components"]["MatchColumnsStep"]["baseStyle"]
+
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="full">
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Schema Editor</ModalHeader>
+        <Heading {...styles.heading}></Heading>
+
         <ModalCloseButton />
         <Select placeholder="Select theme" value={theme} onChange={handleThemeChange} mb={4}>
           {Object.entries(THEMES).map(([key, value]) => (

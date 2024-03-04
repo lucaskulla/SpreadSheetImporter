@@ -14,15 +14,10 @@ import React, { useEffect, useState } from "react"
 import type { themeOverrides } from "../../../theme"
 import { Column, hasValue } from "../MatchColumnsStep"
 import validator from "@rjsf/validator-ajv8"
-import type { RJSFSchema } from "@rjsf/utils"
 import type { Field } from "../../../types"
-import ChakraTextarea from "./widgets/ChakraTextarea"
-import ChakraSelect from "./widgets/ChakraSelect"
-import AlternateMatchesWidget from "./widgets/AlternateMatchesWidget"
-import ValidationsField from "./widgets/ValidationsField"
-import ChakraInput from "./widgets/ChakraInput"
 import { useFieldContext } from "../../../context/FieldProvider"
-import { JSX } from "react/jsx-runtime"
+import { schemaField } from "../utils/schemaField"
+import { uiSchema } from "./schemaDialog"
 
 //TODO Ende Validierung
 //TODO Post der Daten ggf. 5 Seite erstellen
@@ -57,8 +52,11 @@ const ModalAddField: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, column
     const { formData } = data
     //This if is needed because officially FieldType is an array, however, in the schema above it is just an enum, because it is easier to display. Here is the array created
     if (typeof formData.fieldType === "string") {
+      console.log("HUI")
       formData.fieldType = { type: formData.fieldType }
     }
+    console.log("TUP")
+
 
     const fieldData: Field<string> = formData
     addField(fieldData)
@@ -70,119 +68,6 @@ const ModalAddField: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, column
 
   const handleToggleCreateNewField = () => {
     setCreateNewField((prevValue) => !prevValue)
-  }
-
-  const schemaField: RJSFSchema = {
-    type: "object",
-    properties: {
-      label: {
-        type: "string",
-      },
-      key: {
-        type: "string",
-      },
-      description: {
-        type: "string",
-      },
-      alternateMatches: {
-        type: "array",
-        items: {
-          type: "string",
-        },
-      },
-      validations: {
-        type: "array",
-        items: {
-          $ref: "#/definitions/Validation",
-        },
-      },
-      fieldType: {
-        default: "input",
-        enum: ["checkbox", "select", "input"],
-      },
-      example: {
-        type: "string",
-      },
-    },
-    required: ["label", "key", "fieldType"],
-    additionalProperties: false,
-    definitions: {
-      Validation: {
-        type: "object",
-        properties: {
-          rule: {
-            type: "string",
-            enum: ["required", "unique", "regex"],
-          },
-          value: {
-            type: "string",
-          },
-          flags: {
-            type: "string",
-          },
-          errorMessage: {
-            type: "string",
-          },
-          level: {
-            type: "string",
-            enum: ["warning", "error"],
-          },
-          allowEmpty: {
-            type: "boolean",
-          },
-        },
-        required: ["rule", "errorMessage"],
-        additionalProperties: false,
-      },
-    },
-  }
-
-
-  const uiSchema = {
-    "ui:rootFieldId": "label",
-    "ui:autofocus": true,
-    label: {
-      "ui:widget": (
-        props: JSX.IntrinsicAttributes & { onChange: any; onBlur: any; onFocus: any; value?: "" | undefined },
-      ) => <ChakraInput {...props} />,
-    },
-    key: {
-      "ui:widget": (
-        props: JSX.IntrinsicAttributes & { onChange: any; onBlur: any; onFocus: any; value?: "" | undefined },
-      ) => <ChakraInput {...props} />,
-    },
-    description: {
-      "ui:widget": (props: JSX.IntrinsicAttributes & { onChange: any; onBlur: any; onFocus: any; value: any }) => (
-        <ChakraTextarea {...props} />
-      ),
-    },
-    alternateMatches: {
-      "ui:widget": (
-        props: JSX.IntrinsicAttributes & { id: any; value: any; onChange: any; onBlur: any; onFocus: any },
-      ) => <AlternateMatchesWidget {...props} />,
-    },
-    validations: {
-      "ui:widget": (props: JSX.IntrinsicAttributes & { formData: any; onChange: any }) => (
-        <ValidationsField {...props} />
-      ),
-    },
-    fieldType: {
-      "ui:widget": (
-        props: JSX.IntrinsicAttributes & {
-          id: any
-          options: any
-          value: any
-          onChange: any
-          onBlur: any
-          onFocus: any
-        },
-      ) => <ChakraSelect {...props} />,
-    },
-    example: {
-      "ui:widget": (props: JSX.IntrinsicAttributes & { onChange: any; onBlur: any; onFocus: any; value: any }) => (
-        <ChakraTextarea {...props} />
-      ),
-    },
   }
 
 
