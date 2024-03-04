@@ -198,7 +198,6 @@ export const MatchColumnsStep = <T extends string>({ data, headerValues, onConti
 
     // Iterate over convertedSchema if it's defined
     convertedSchema.forEach(schemaItem => {
-      console.log(schemaItem)
       addField(schemaItem)
     })
 

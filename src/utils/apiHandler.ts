@@ -22,12 +22,8 @@ export const useApi = () => {
   }, [toast])
 
   const uploadDataToAPI = useCallback((data: Data<any>[] | Data<any>, schemaToUse: string | undefined) => async () => {
-    console.log(schemaUploadSuccess)
     if (!schemaUploadSuccess) return
     try {
-      console.log("Upload Data with schema: " + schemaToUse)
-
-
       // Initial validation to ensure there's data to process.
       if (!data || (Array.isArray(data) && data.length === 0)) {
         throw new Error("No data to upload")
