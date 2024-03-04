@@ -1,46 +1,87 @@
-# Getting Started with Create React App
+---
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Harmonized Data Import Tool
 
-## Available Scripts
+## Overview
 
-In the project directory, you can run:
+This tool, developed as part of a thesis at Heidelberg University and DKFZ Heidelberg, provides a streamlined solution
+for importing clinical research data into the open-source image analysis platform Kaapana. It aims to harmonize tabular
+data from various sources, ensuring consistency and compatibility with Kaapana's data processing capabilities.
 
-### `npm start`
+## Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- **Data Harmonization:** Automatically aligns disparate data formats and structures into a unified format compatible
+  with [Kaapana](https://www.kaapana.ai).
+- **User-Friendly Interface:** A React-based GUI that simplifies the process of data importation and management.
+- **Extensible Framework:** Designed with modularity in mind, allowing for easy expansion and customization.
+- **Comprehensive Error Handling:** Provides detailed feedback on importation errors, facilitating quick
+  troubleshooting.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Prerequisites
 
-### `npm test`
+Before you begin, ensure you have the following installed:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- Node.js (version 12.x or later)
+- Yarn package manager
 
-### `npm run build`
+Additionally, access to a Kaapana instance is necessary for the tool's full functionality.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Installation
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourrepository/harmonized-data-import-tool.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd harmonized-data-import-tool
+   ```
+3. Install dependencies using Yarn:
+   ```bash
+   yarn install
+   ```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Usage
 
-### `npm run eject`
+To run the application locally:
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+1. Start the development server:
+   ```bash
+   yarn start
+   ```
+2. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+The application will reload if you make edits. You will also see any lint errors in the console.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## Configuration
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+Configuration details specific to data sources and Kaapana can be found in the `config` directory. Adjust these
+parameters to match your environment and data structure requirements.
 
-## Learn More
+## Contributing
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+We welcome contributions to improve the tool's functionality and extend its features.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## License
+
+This project is licensed under the MIT License - see the `LICENSE` file for details.
+
+Incorporating your request, here is an updated Acknowledgments section for the README:
+
+---
+
+## Acknowledgments
+
+This tool was developed as part of a Bachelor's thesis by Lucas Kulla under the supervision of Prof. Dr. Klaus
+Maier-Hein and M.Sc. Philipp Schader at Heidelberg University. It is a fork of
+the [React Spreadsheet Import](https://github.com/UgnisSoftware/react-spreadsheet-import) project by UgnisSoftware,
+adapted and extended to meet the specific requirements of harmonizing clinical research data for the Kaapana platform.
+This acknowledgment pays homage to the original project while highlighting the contributions and support from your
+academic and development team.
+
+---
+
+This README template provides a starting point. You should customize each section to fit the specific details and
+requirements of your project, such as the exact installation steps, configuration details, and contribution guidelines.
+Additionally, ensure all links (e.g., to the repository, documentation, or external resources) are correct and
+functional before publishing.
