@@ -38,9 +38,14 @@ class ApiClient {
   }
 }
 
-const envBaseUrl: string = getEnvVar("REACT_APP_API_BASE_URL")
-// Determine the base URL: Use the environment variable if available, otherwise, construct it for production.
-const baseURL = envBaseUrl || `${window.location.protocol}//${window.location.host}/persistence/api`
+let baseURL: string
+
+if (getEnvVar("REACT_APP_DEV_MODE") === "true") {
+  baseURL = getEnvVar("REACT_APP_API_BASE_URL")
+  console.log("dev mode enabled")
+} else {
+  baseURL = `${window.location.protocol}//${window.location.host}/persistence/api`
+}
 
 console.log("Using API base URL:", baseURL)
 
