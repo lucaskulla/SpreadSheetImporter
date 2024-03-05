@@ -40,7 +40,7 @@ function fieldsToJsonSchema(fields: Field<string>[], schemaUsed: string | undefi
     $schema: "http://json-schema.org/draft-07/schema#",
     additionalProperties: true,
     metamodel_version: "1.7.0",
-    required: ["id"],
+    required: [],
     version: nextVersion,
   }
 

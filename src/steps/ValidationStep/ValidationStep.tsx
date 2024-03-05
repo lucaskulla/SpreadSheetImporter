@@ -134,6 +134,7 @@ export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
         ajv.addMetaSchema(draft7MetaSchema)
         ajv.addKeyword("metamodel_version")
         ajv.addKeyword("version")
+        ajv.addKeyword("x-alternateMatches")
         const validate = ajv.compile(schema)
         // Validate data against the schema
 
