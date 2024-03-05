@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios"
+import { getEnvVar } from "../utils/getEnvVar"
 
-type ApiResponse<T> = AxiosResponse<T>
+type ApiResponse<T> = AxiosResponse<T>;
 
 class ApiClient {
   private axiosInstance: AxiosInstance
@@ -11,37 +12,39 @@ class ApiClient {
     })
   }
 
-  private async request<T>(config: AxiosRequestConfig): Promise<ApiResponse<T>> {
-    try {
-      const response = await this.axiosInstance.request<T>(config)
-      return response
-    } catch (error) {
-      throw error
-    }
-  }
-
-  public async get<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  public get<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     return this.request<T>({ ...config, method: "GET", url })
   }
 
-  public async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  public post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     return this.request<T>({ ...config, method: "POST", url, data })
   }
 
-  public async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  public put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     return this.request<T>({ ...config, method: "PUT", url, data })
   }
 
-  public async patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  public patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     return this.request<T>({ ...config, method: "PATCH", url, data })
   }
 
-  public async delete<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  public delete<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     return this.request<T>({ ...config, method: "DELETE", url })
+  }
+
+  // Simplified request method with direct throwing of the caught error
+  private async request<T>(config: AxiosRequestConfig): Promise<ApiResponse<T>> {
+    return this.axiosInstance.request<T>(config)
   }
 }
 
-const url = window.location.hostname;
-const apiClient = new ApiClient("http://" + url + ":8000")
+const envBaseUrl: string = getEnvVar("REACT_APP_API_BASE_URL")
+// Determine the base URL: Use the environment variable if available, otherwise, construct it for production.
+const baseURL = envBaseUrl || `${window.location.protocol}//${window.location.host}/persistence/api`
+
+console.log("Using API base URL:", baseURL)
+
+const apiClient = new ApiClient(baseURL)
+
 
 export default apiClient

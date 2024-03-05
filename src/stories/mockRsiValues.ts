@@ -1,50 +1,12 @@
-import type { Field, Fields, RsiProps } from "../types"
+import type { Fields, RsiProps } from "../types"
 import { defaultRSIProps } from "../ReactSpreadsheetImport"
 
 let fields: Fields<string> = []
-let schemaUsed = false
 
 const mockComponentBehaviourForTypes = <T extends string>(props: RsiProps<T>) => props
 
 export const mockRsiValues = mockComponentBehaviourForTypes({
-  addField: (field: Field<string>) => {
-    if (field.key === undefined || field.key === "") {
-      console.log("field is empty")
-      return null
-    } else {
-      const index = fields.findIndex((f) => f.key === field.key)
-      if (index === -1) {
-        //Field does not exist yet -> new entry
-        fields = fields.concat(field)
-      } else {
-        console.log("field already exists", field.key)
-        //Field already exists -> update entry
-        fields[index] = field
-      }
-    }
-  },
-
-  setSchemaUsed: (value: boolean) => {
-    schemaUsed = value
-  },
-
-  getSchemaUsed: () => {
-    return schemaUsed
-  },
-
-  getFields: () => {
-    return fields
-  },
-
-  getSpecificField: (field: string) => {
-    if (field === undefined || field === "") {
-      return null
-    } else {
-      return fields.find((f) => f.key === field)
-    }
-  },
-
-  //fields: getField(),
+  
   ...defaultRSIProps, //LK: ohne geht Storybook "MatchColumnsStep" nicht
   fields: fields,
   onSubmit: (data) => {

@@ -11,24 +11,22 @@ function incrementVersion(version: string): string {
   return parts.join(".")
 }
 
-function fieldsToJsonSchema(fields: Field<string>[], schemaUsed: boolean): JSONSchema {
+function fieldsToJsonSchema(fields: Field<string>[], schemaUsed: string | undefined): JSONSchema {
   let nextVersion = undefined
   let id = undefined
   if (schemaUsed) {
-    const stringToMatch = localStorage.getItem("schemaToUse")
 
-    if (stringToMatch) {
-      const versionRegex = /(\d+\.\d+\.\d+)/
-      const match = stringToMatch.match(versionRegex)
-      if (match) {
-        const version = match[1]
-        nextVersion = incrementVersion(version)
-      } else {
-        console.log("Version not found")
-      }
+    const versionRegex = /(\d+\.\d+\.\d+)/
+    const match = schemaUsed.match(versionRegex)
+    if (match) {
+      const version = match[1]
+      nextVersion = incrementVersion(version)
+    } else {
+      console.log("Version not found")
 
-      const versionIndex = stringToMatch.lastIndexOf(":") // find the last occurrence of ":"
-      id = stringToMatch.substring(0, versionIndex) // extract everything before the version
+
+      const versionIndex = schemaUsed.lastIndexOf(":") // find the last occurrence of ":"
+      id = schemaUsed.substring(0, versionIndex) // extract everything before the version
     }
   } else {
     id = "urn:kaapana:newschema"
@@ -41,8 +39,8 @@ function fieldsToJsonSchema(fields: Field<string>[], schemaUsed: boolean): JSONS
     $id: id,
     $schema: "http://json-schema.org/draft-07/schema#",
     additionalProperties: true,
-    metamodel_version2: "1.7.0",
-    required: ["id"], //ToDO check with Philipp
+    metamodel_version: "1.7.0",
+    required: ["id"],
     version: nextVersion,
   }
 
@@ -77,7 +75,7 @@ function fieldsToJsonSchema(fields: Field<string>[], schemaUsed: boolean): JSONS
         }
       } else {
         if (!currentObject.properties[propertyName]) {
-          const definitionName = propertyName //TODO: check name that is liked e.g. +def
+          const definitionName = propertyName
           schema.$defs[definitionName] = {
             type: "object",
             properties: {},
@@ -89,8 +87,7 @@ function fieldsToJsonSchema(fields: Field<string>[], schemaUsed: boolean): JSONS
 
           currentObject = schema.$defs[definitionName]
         } else {
-          const definitionName = propertyName //TODO: check name that is liked e.g. +def
-          currentObject = schema.$defs[definitionName]
+          currentObject = schema.$defs[propertyName]
         }
       }
     }

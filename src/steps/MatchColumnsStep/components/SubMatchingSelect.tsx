@@ -4,6 +4,7 @@ import { getFieldOptions } from "../utils/getFieldOptions"
 import { useRsi } from "../../../hooks/useRsi"
 import type { MatchedOptions, MatchedSelectColumn, MatchedSelectOptionsColumn } from "../MatchColumnsStep"
 import type { Styles } from "./ColumnGrid"
+import { useFieldContext } from "../../../context/FieldProvider"
 
 interface Props<T> {
   option: MatchedOptions<T> | Partial<MatchedOptions<T>>
@@ -13,7 +14,14 @@ interface Props<T> {
 
 export const SubMatchingSelect = <T extends string>({ option, column, onSubChange }: Props<T>) => {
   const styles = useStyleConfig("MatchColumnsStep") as Styles
-  const { translations, fields } = useRsi<T>()
+  const { translations } = useRsi<T>()
+
+  const {
+    getFields,
+  } = useFieldContext()
+
+  const fields = getFields()
+
   const options = getFieldOptions(fields, column.value)
   const value = options.find((opt) => opt.value == option.value)
 

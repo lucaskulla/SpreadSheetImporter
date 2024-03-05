@@ -10,7 +10,9 @@ import { SubmitDataAlert } from "../../components/Alerts/SubmitDataAlert"
 import type { Data } from "../../types"
 import type { themeOverrides } from "../../theme"
 import type { RowsChangeData } from "react-data-grid"
-import { DataIsInvalid } from "../../components/Alerts/DataIsInvalidAlert" // Import the DataIsInvalid component
+import { DataIsInvalid } from "../../components/Alerts/DataIsInvalidAlert"
+import { useSchemaContext } from "../../context/SchemaProvider"
+import { useFieldContext } from "../../context/FieldProvider"
 
 const Ajv2020 = require("ajv/dist/2020")
 
@@ -20,7 +22,11 @@ type Props<T extends string> = {
 }
 
 export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
-  const { translations, onClose, onSubmit, rowHook, tableHook, getFields } = useRsi<T>()
+  const { translations, onClose, onSubmit, rowHook, tableHook } = useRsi<T>()
+  const {
+    getFields,
+  } = useFieldContext()
+
   let fields = getFields()
   const styles = useStyleConfig("ValidationStep") as typeof themeOverrides["components"]["ValidationStep"]["baseStyle"]
 
@@ -35,6 +41,11 @@ export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
   const [filterByErrors, setFilterByErrors] = useState(false)
   const [showSubmitAlert, setShowSubmitAlert] = useState(false)
   const [isAlertOpen, setIsAlertOpen] = useState(false)
+
+  const {
+    isSchemaUsed,
+    selectedSchema,
+  } = useSchemaContext() // Use the context to get schema-related states and setters
 
   const updateData = useCallback(
     (rows: typeof data) => {
@@ -113,22 +124,17 @@ export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
     let hasInvalidData = false
 
     //Only if schema is used, validation step should be executed
-    if (localStorage.getItem("schemaUsed") === "true") {
+    if (isSchemaUsed) {
 
       const ajv = new Ajv2020()
-      const schema = localStorage.getItem("schemaFromAPI")
+      const schema = selectedSchema
 
       if (schema) {
-        // @ts-ignore
-        const schemaParsed = JSON.parse(schema)
-
-        // @ts-ignore
-        //ajv.addKeyword(schemaParsed["$schema"])
         const draft7MetaSchema = require("ajv/dist/refs/json-schema-draft-07.json")
         ajv.addMetaSchema(draft7MetaSchema)
         ajv.addKeyword("metamodel_version")
         ajv.addKeyword("version")
-        const validate = ajv.compile(schemaParsed)
+        const validate = ajv.compile(schema)
         // Validate data against the schema
 
         for (let i = 0; i < all.length; i++) {
@@ -167,6 +173,7 @@ export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
     }
   }
 
+  // @ts-ignore
   return (
     <>
       <SubmitDataAlert
@@ -203,8 +210,8 @@ export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
             onRowsChange={updateRow}
             columns={columns}
             selectedRows={selectedRows}
-            onSelectedRowsChange={setSelectedRows}
             //@ts-ignore
+            onSelectedRowsChange={setSelectedRows}
             components={{
               noRowsFallback: (
                 <Box display="flex" justifyContent="center" gridColumn="1/-1" mt="32px">

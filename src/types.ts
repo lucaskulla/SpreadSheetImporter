@@ -3,24 +3,21 @@ import type { TranslationsRSIProps } from "./translationsRSIProps"
 import type { Columns } from "./steps/MatchColumnsStep/MatchColumnsStep"
 import type { StepState } from "./steps/UploadFlow"
 
+
 export type RsiProps<T extends string> = {
   // Is modal visible.
   isOpen: boolean
   // callback when RSI is closed before final submit
   onClose: () => void
   // Field description for requested data
-  fields?: Fields<T> //ist jetzt optional, mal schauen, ob das klappt!
+  fields?: Fields<T>
   //Set field property -> ACHTUNG: Man darf nicht den KEY ändern. Das führt zu Problemen!
-  addField: (fields: Field<string>) => void
+  //addField: (fields: Field<string>) => void
   //Get field property
-  getFields: () => Fields<T>
+  //getFields: () => Fields<T>
   //Get specific field property
-  getSpecificField: (f: string) => Field<string> | null | undefined
+  //getSpecificField: (f: string) => Field<string> | null | undefined
 
-  //In the beginning user has option to choose between using an exisiting schema or creating a new one
-  //Set if schema is used
-  setSchemaUsed: (value: boolean) => void
-  getSchemaUsed: () => boolean
 
   // Runs after file upload step, receives and returns raw sheet data
   uploadStepHook?: (data: RawData[]) => Promise<RawData[]> //recreate fields object

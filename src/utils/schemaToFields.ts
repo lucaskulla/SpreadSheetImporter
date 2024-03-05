@@ -6,7 +6,9 @@ type JSONSchema = {
 
 let fieldsList: Fields<string> = []
 
+
 function createValidations(property: JSONSchema): Validation[] {
+  console.log("Add validation")
   const validations: Validation[] = []
 
   if (property.required) {
@@ -25,7 +27,39 @@ function createValidations(property: JSONSchema): Validation[] {
     validations.push(regexValidation)
   }
 
+  console.log(validations)
+
   return validations
+}
+
+function addRequiredValidationFromSchema(requiredFields: string[]): Field<string>[] | undefined {
+  if (requiredFields.length === 0) {
+    return undefined
+  }
+
+  const updatedFieldsList: Field<string>[] = fieldsList.slice() // Clone to avoid direct modification
+
+  requiredFields.forEach(requiredField => {
+    const index = updatedFieldsList.findIndex(field => field.key.toLowerCase() === requiredField.toLowerCase())
+    if (index !== -1) {
+      // Field exists, add required validation
+      updatedFieldsList[index].validations = updatedFieldsList[index].validations || []
+      if (updatedFieldsList[index].validations !== undefined) {
+        // @ts-ignore
+        updatedFieldsList[index].validations.push({ rule: "required" })
+      }
+    } else {
+      // Field does not exist, add it manually
+      updatedFieldsList.push({
+        label: requiredField, // Assuming label is same as key for new fields, adjust as necessary
+        key: requiredField,
+        fieldType: { type: "input" },
+        validations: [{ rule: "required" }],
+      })
+    }
+  })
+
+  return updatedFieldsList
 }
 
 function createAlternateMatches(property: JSONSchema): string[] | undefined {
@@ -38,6 +72,7 @@ function removeDuplicatesFromString(strings: string): string {
 
   for (const str of stringSplit) {
     if (uniqueStrings.has(str)) {
+      continue
     }
     uniqueStrings.add(str)
   }
@@ -139,7 +174,19 @@ function jsonSchemaToFields(schema: JSONSchema): Fields<string> {
     processProperty(key, property, defs)
   }
 
-  localStorage.setItem("fieldsList", JSON.stringify(fieldsList))
+
+  const requiredFields = schema["required"] || []
+
+
+  const fieldsAndRequiredFields = addRequiredValidationFromSchema(requiredFields)
+
+  if (fieldsAndRequiredFields) {
+    console.log(fieldsAndRequiredFields, "fieldsAndRequiredFields")
+    return fieldsAndRequiredFields
+  }
+
+
+  console.log(fieldsList)
 
   return fieldsList
 }

@@ -84,7 +84,6 @@ export const generateColumns = <T extends string>(fields: Fields<T>): Column<Dat
                 <Input
                   ref={autoFocusAndSelect}
                   variant="unstyled"
-                  autoFocus
                   size="small"
                   value={row[column.key] as string}
                   onChange={(event: ChangeEvent<HTMLInputElement>) => {
@@ -98,6 +97,7 @@ export const generateColumns = <T extends string>(fields: Fields<T>): Column<Dat
 
         return component
       },
+      //removed autofocus line 86
       editorOptions: {
         editOnClick: true,
       },

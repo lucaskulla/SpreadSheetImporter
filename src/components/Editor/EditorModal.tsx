@@ -21,9 +21,13 @@ type EditorModalProps = {
   onSave: (dataEditor: string, changesInKeys: any) => void;
 };
 
+const THEMES = {
+  light: "light",
+  dark: "vs-dark",
+}
+
 const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
-  const originalData = data
-  const [theme, setTheme] = useState("dark")
+  const [theme, setTheme] = useState(THEMES.dark)
   let dataAsString = ""
   try {
     // @ts-ignore
@@ -37,8 +41,8 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
     console.log(e)
   }
 
-  const [editor1Value, setEditor1Value] = useState(dataAsString || "// After import of data the data is displayed here")
-  const [editor2Value, setEditor2Value] = useState(
+  const [editorLeftValue, setEditorLeftValue] = useState(dataAsString || "// After import of data the data is displayed here")
+  const [editorCodeValue, setEditorCodeValue] = useState(
     " //in the variable data is the data from the left side stored\n \n" +
     "function foot(){" +
     "\n " +
@@ -47,34 +51,34 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
     "return JSON.stringify(dataLeftSide, null, 4) " +
     "\n}",
   )
-  const [editor3Value, setEditor3Value] = useState("// The new data is displayed here")
+  const [editorRightValue, setEditorRightValue] = useState("// The new data is displayed here")
 
-  const handleEditor1Change = (value: any) => {
-    setEditor1Value(value)
+  const handleEditorLeftChange = (value: any) => {
+    setEditorLeftValue(value)
   }
 
   const executeCode = () => {
     try {
       const data = dataAsString
-      const wrappedCode = `(${editor2Value})();`
+      const wrappedCode = `(${editorCodeValue})();`
       let result = eval(wrappedCode)
 
       if (typeof result === "function") {
         try {
           result = result(data)
-          setEditor3Value(JSON.stringify(result, null, 2))
+          setEditorRightValue(JSON.stringify(result, null, 2))
         } catch (e) {
           console.log(e)
         }
       } else {
         try {
-          setEditor3Value(result)
+          setEditorRightValue(result)
         } catch (e) {
           console.log(e)
         }
       }
     } catch (error: any) {
-      setEditor3Value(error.toString())
+      setEditorRightValue(error.toString())
     }
   }
 
@@ -100,9 +104,9 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
     }
   }
 
-  const onSaveAndSetEditor1Value = (dataEditorSchema: string) => {
+  const onSaveAndSeteditorLeftValue = (dataEditorSchema: string) => {
     const changesInKeys = checkWhichPropertiesAdded(dataEditorSchema)
-    setEditor1Value(dataEditorSchema)
+    setEditorLeftValue(dataEditorSchema)
     onSave(dataEditorSchema, changesInKeys)
   }
 
@@ -122,7 +126,7 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
             <option value="vs-dark">Dark</option>
           </Select>
           <Box display="flex" justifyContent="flex-end" mt={4}>
-            <Button onClick={() => onSaveAndSetEditor1Value(editor3Value)}>
+            <Button onClick={() => onSaveAndSeteditorLeftValue(editorRightValue)}>
               Save
             </Button>
           </Box>
@@ -133,15 +137,17 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
                 width="100%"
                 language={"JSON"}
                 theme={theme}
-                defaultValue={editor1Value || "// You can write your code here..."}
-                value={editor1Value || "// You can write your code here..."}
-                onChange={handleEditor1Change}
+                defaultValue={editorLeftValue || "// You can write your code here..."}
+                value={editorLeftValue || "// You can write your code here..."}
+                onChange={handleEditorLeftChange}
                 options={{
                   selectOnLineNumbers: true,
                   roundedSelection: false,
                   readOnly: false,
                   cursorStyle: "line",
                   automaticLayout: true,
+                  colorDecorators: true,
+
                 }}
               />
               <div>
@@ -150,14 +156,16 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
                   width="100%"
                   language={"JavaScript"}
                   theme={theme}
-                  defaultValue={editor2Value || "no file selected"}
-                  onChange={(value: any) => setEditor2Value(value)}
+                  defaultValue={editorCodeValue || "no file selected"}
+                  onChange={(value: any) => setEditorCodeValue(value)}
                   options={{
                     selectOnLineNumbers: true,
                     roundedSelection: false,
                     readOnly: false,
                     cursorStyle: "line",
                     automaticLayout: true,
+                    colorDecorators: true,
+
                   }}
                 />
                 <Box display="flex" justifyContent="center" mt={4}>
@@ -170,30 +178,32 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
                   width="100%"
                   language={"JSON"}
                   theme={theme}
-                  original={editor1Value}
-                  modified={editor3Value}
+                  original={editorLeftValue}
+                  modified={editorRightValue}
                   options={{
                     selectOnLineNumbers: true,
                     roundedSelection: false,
                     readOnly: false,
                     cursorStyle: "line",
                     automaticLayout: true,
+                    colorDecorators: true,
                   }}
                 />
               </div>
               <Editor
                 height="100%"
                 width="100%"
-                language={"JavaScript"}
+                language={"JSON"}
                 theme={theme}
-                defaultValue={editor3Value}
-                value={editor3Value}
+                defaultValue={editorRightValue}
+                value={editorRightValue}
                 options={{
                   selectOnLineNumbers: true,
                   roundedSelection: false,
                   readOnly: true,
                   cursorStyle: "line",
                   automaticLayout: true,
+                  colorDecorators: true,
                 }}
               />
             </Grid>

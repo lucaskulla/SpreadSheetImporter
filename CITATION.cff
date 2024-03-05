@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+title: Harmonized import of clinical research data for the open source image analysis platform Kaapana
+authors:
+    - family-names: Kulla
+      given-names: Lucas
+      orcid: 0000-0002-2484-2742
+    - family-names: Schader
+      given-names: Philipp
+        orcid: 0000-0002-6075-0757
+    - family-names: Maier-Hein
+      given-names: Klaus
+        orcid: 0000-0002-6626-2463
+    - family-names: Nolden
+      given-names: Marco
+      orcid: 0000-0001-9629-0564

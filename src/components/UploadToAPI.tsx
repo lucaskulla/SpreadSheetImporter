@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react"
+import React, { useCallback, useState } from "react"
 import {
-  Box,
   Button,
   Checkbox,
   FormControl,
@@ -13,7 +12,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  useToast,
 } from "@chakra-ui/react"
 import { RsiProps } from "../types"
 import merge from "lodash/merge"
@@ -22,64 +20,46 @@ import { Providers } from "./Providers"
 import { defaultTheme } from "../ReactSpreadsheetImport"
 import { mockRsiValues } from "../stories/mockRsiValues"
 import { translations } from "../translationsRSIProps"
+import { useSchemaContext } from "../context/SchemaProvider"
 
 interface UploadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUploadData: () => void;
-  onUploadSchema: () => void;
-  setSchemaName: (name: string) => void;
+  onUploadData: () => Promise<void>;
+  onUploadSchema: () => Promise<void>;
 }
 
-const UploadModal: React.FC<UploadModalProps> = ({
-                                                   isOpen,
-                                                   onClose,
-                                                   onUploadData,
-                                                   onUploadSchema,
-                                                   setSchemaName,
-                                                 }) => {
+const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onUploadData, onUploadSchema }) => {
   const [uploadData, setUploadData] = useState(false)
   const [uploadSchema, setUploadSchema] = useState(false)
-  const [schemaName, setSchemaNameLocal] = useState("")
-  const toast = useToast()
+  const [uploadOngoing, setUploadOngoing] = useState(false)
+  const { schemaToUse, setSchemaToUse } = useSchemaContext()
 
-  const isSchemaNameValid = (name: string) => {
+
+  const isSchemaNameValid = useCallback((name: string) => {
     const regex = /^urn:[a-zA-Z0-9]+:[a-zA-Z0-9]/
-    return regex.test(name)
-  }
-
-  useEffect(() => {
-
-    const originalSchemaName = localStorage.getItem("schemaName")
-    if (originalSchemaName !== "urn:kaapana:newSchema:0.0.1") {
-      setSchemaNameLocal(originalSchemaName || "")
-    }
+    return !!name && regex.test(name)
   }, [])
 
-  const handleSubmit = () => {
-    if (uploadSchema) {
-      if (!isSchemaNameValid(schemaName)) {
-        toast({
-          status: "error",
-          variant: "left-accent",
-          position: "bottom-left",
-          title: "Invalid schema name",
-          description: "Schema name does not match the pattern: urn:String:String:SemverVersion",
-          isClosable: true,
-        })
-        return
+  const handleSubmit = async () => {
+    setUploadOngoing(true) // Start loading indication
+    try {
+      if (uploadSchema && schemaToUse) {
+        await onUploadSchema()
+        console.log("Schema uploaded successfully")
       }
-      setSchemaNameLocal(schemaName)
-      setSchemaName(schemaName)
-      localStorage.setItem("schemaName", schemaName)
-      onUploadSchema()
+      if (uploadData) {
+        await onUploadData()
+        console.log("Data uploaded successfully")
+      }
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setUploadOngoing(false) // Stop loading indication regardless of outcome
+      onClose() // Ensure modal closure happens after all operations
     }
-    if (uploadData) {
-      onUploadData()
-    }
-
-    onClose()
   }
+
 
   const props: RsiProps<any> = mockRsiValues
   const mergedTranslations =
@@ -98,38 +78,30 @@ const UploadModal: React.FC<UploadModalProps> = ({
           <ModalHeader>Upload your data and schema</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Box my={2}>
-              <Checkbox isChecked={uploadData} onChange={(e) => setUploadData(e.target.checked)}>
-                Upload Data
-              </Checkbox>
-            </Box>
-            <Box my={2}>
-              <Checkbox isChecked={uploadSchema} onChange={(e) => setUploadSchema(e.target.checked)}>
-                Upload Schema
-              </Checkbox>
-            </Box>
+            <Checkbox isChecked={uploadData} onChange={(e) => setUploadData(e.target.checked)}>
+              Upload your Data
+            </Checkbox>
+            <br />
+            <Checkbox isChecked={uploadSchema} onChange={(e) => setUploadSchema(e.target.checked)} my={4}>
+              Upload your Schema
+            </Checkbox>
             {uploadSchema && (
-              <Box my={4}>
-                <FormControl>
-                  <Input
-                    value={schemaName}
-                    onChange={(e) => setSchemaNameLocal(e.target.value)}
-                    placeholder="Enter schema name"
-                    isInvalid={!isSchemaNameValid(schemaName)}
-                  />
-                  <FormHelperText>{isSchemaNameValid(schemaName) ? "Valid Schema Name" : "Invalid Schema Name"}</FormHelperText>
-                  <FormHelperText>Example: urn:namespace:schemaName</FormHelperText>
-                </FormControl>
-              </Box>
+              <FormControl isInvalid={!isSchemaNameValid(schemaToUse || "")}>
+                <Input
+                  value={schemaToUse || ""} // Fallback to empty string if schemaToUse is undefined
+                  onChange={(e) => setSchemaToUse(e.target.value)}
+                  placeholder="Enter schema name"
+                />
+                <FormHelperText>{isSchemaNameValid(schemaToUse || "") ? "Valid Schema Name" : "Invalid Schema Name"}</FormHelperText>
+                <FormHelperText>Example: urn:namespace:schemaName</FormHelperText>
+              </FormControl>
             )}
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleSubmit}>
+            <Button colorScheme="blue" onClick={handleSubmit} mr={3} isLoading={uploadOngoing}>
               Submit
             </Button>
-            <Button variant="ghost" onClick={onClose}>
-              Cancel
-            </Button>
+            <Button variant="ghost" onClick={onClose}>Cancel</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
