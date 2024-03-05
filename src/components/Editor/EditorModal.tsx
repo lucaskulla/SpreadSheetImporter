@@ -85,6 +85,7 @@ const EditorModal = ({ isOpen, onClose, data, onSave }: EditorModalProps) => {
   const editorHeight = "calc(45vh - 10px)" // -20px to account for the gap
 
   function checkWhichPropertiesAdded(modified: string) {
+    console.log(modified)
     const modifiedJSON = JSON.parse(modified)
     const originalJSON = data
 

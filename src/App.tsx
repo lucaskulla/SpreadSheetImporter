@@ -10,6 +10,7 @@ import {
   ModalOverlay,
   Text,
   useDisclosure,
+  useToast,
 } from "@chakra-ui/react"
 import { mockRsiValues } from "./stories/mockRsiValues"
 import React, { useState } from "react"
@@ -68,6 +69,9 @@ export const Basic = () => {
   const onUploadData = uploadDataToAPI(data, schemaToUse)
   const onUploadSchema = uploadNewSchemaToAPI(schemaToUse, getFields())
 
+  const saveDataEditor = (dataEditor: string, changesInKeys: any) => {
+    saveDataFromEditor(dataEditor, changesInKeys, setData, getFields(), setIsOpenJsonEditor, useToast)
+  }
 
   return (
     <Providers theme={mergedThemes} rsiValues={{ ...props, translations: mergedTranslations }}>
@@ -116,7 +120,7 @@ export const Basic = () => {
                   <ModalCloseButton />
                 </ModalHeader>
                 <ModalBody>
-                  <EditorModal isOpen={isEditorOpen} onClose={onCloseEditor} data={data} onSave={saveDataFromEditor}
+                  <EditorModal isOpen={isEditorOpen} onClose={onCloseEditor} data={data} onSave={saveDataEditor}
                   />
                   {data && (
                     <Box marginTop="10px">

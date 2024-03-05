@@ -1,7 +1,14 @@
 import type { Field } from "../types"
 
-type JSONSchema = {
-  [key: string]: any
+interface JSONSchema {
+  $defs: { [key: string]: any };
+  properties: { [key: string]: any };
+  $id?: string;
+  $schema: string;
+  additionalProperties: boolean;
+  metamodel_version: string;
+  required: string[];
+  version?: string;
 }
 
 function incrementVersion(version: string): string {
@@ -11,26 +18,23 @@ function incrementVersion(version: string): string {
   return parts.join(".")
 }
 
-function fieldsToJsonSchema(fields: Field<string>[], schemaUsed: string | undefined): JSONSchema {
-  let nextVersion = undefined
-  let id = undefined
-  if (schemaUsed) {
+function fieldsToJsonSchema(fields: Field<string>[], schemaUsed?: string): JSONSchema {
+  console.log("schemaUsed", schemaUsed)
 
+  let nextVersion: string = "0.0.1" //default
+  let id: string = "urn:kaapana:newschema" //default
+
+
+  if (schemaUsed) {
     const versionRegex = /(\d+\.\d+\.\d+)/
     const match = schemaUsed.match(versionRegex)
+
     if (match) {
-      const version = match[1]
-      nextVersion = incrementVersion(version)
+      nextVersion = incrementVersion(match[1])
+      id = schemaUsed.substring(0, schemaUsed.lastIndexOf(":")) // Extract ID
     } else {
-      console.log("Version not found")
-
-
-      const versionIndex = schemaUsed.lastIndexOf(":") // find the last occurrence of ":"
-      id = schemaUsed.substring(0, versionIndex) // extract everything before the version
+      id = schemaUsed // No version in schemaUsed, use as ID
     }
-  } else {
-    id = "urn:kaapana:newschema"
-    nextVersion = "0.0.1"
   }
 
   const schema: JSONSchema = {
@@ -40,64 +44,48 @@ function fieldsToJsonSchema(fields: Field<string>[], schemaUsed: string | undefi
     $schema: "http://json-schema.org/draft-07/schema#",
     additionalProperties: true,
     metamodel_version: "1.7.0",
-    required: ["id"],
+    required: [],
     version: nextVersion,
   }
 
-  const addPropertyToSchema = (schema: JSONSchema, propertyPath: string[], field: Field<string>) => {
+
+  fields.forEach((field) => {
+    const propertyPath = field.label.split(".")
+    addPropertyToSchema(schema, propertyPath, field)
+  })
+
+
+  function addPropertyToSchema(schema: JSONSchema, propertyPath: string[], field: Field<string>): void {
     let currentObject = schema
 
-    for (let i = 0; i < propertyPath.length; i++) {
-      const propertyName = propertyPath[i]
+    propertyPath.forEach((propertyName, index) => {
+      if (index === propertyPath.length - 1) {
+        // Final property in the path
+        currentObject.properties[propertyName] = { type: "string", description: field.description }
+        if (field.example) currentObject.properties[propertyName].examples = [field.example]
 
-      if (i === propertyPath.length - 1) {
-        currentObject.properties[propertyName] = {
-          type: "string",
-          description: field.description,
-          examples: field.example ? [field.example] : undefined,
-        }
+        field.validations?.forEach((validation) => {
+          if (validation.rule === "required") schema.required.push(propertyName)
+          else if (validation.rule === "regex") currentObject.properties[propertyName].pattern = validation.value
+        })
 
-        // Add validations
-        if (field.validations) {
-          for (let i = 0; i < field.validations.length; i++) {
-            const validation = field.validations[i]
-            if (validation.rule === "required") {
-              schema.required.push(propertyName)
-            } else if (validation.rule === "regex") {
-              currentObject.properties[propertyName].pattern = validation.value
-            }
-          }
-        }
-
-        // Add alternateMatches
-        if (field.alternateMatches) {
-          currentObject.properties[propertyName]["x-alternateMatches"] = field.alternateMatches
-        }
+        if (field.alternateMatches) currentObject.properties[propertyName]["x-alternateMatches"] = field.alternateMatches
       } else {
+        // Nested property
         if (!currentObject.properties[propertyName]) {
           const definitionName = propertyName
-          schema.$defs[definitionName] = {
-            type: "object",
-            properties: {},
-          }
-
-          currentObject.properties[propertyName] = {
-            $ref: `#/$defs/${definitionName}`,
-          }
-
+          schema.$defs[definitionName] = { type: "object", properties: {} }
+          currentObject.properties[propertyName] = { $ref: `#/$defs/${definitionName}` }
           currentObject = schema.$defs[definitionName]
         } else {
           currentObject = schema.$defs[propertyName]
         }
       }
-    }
-  }
-  for (let i = 0; i < fields.length; i++) {
-    const propertyPath = fields[i].label.split(".")
-    addPropertyToSchema(schema, propertyPath, fields[i])
+    })
   }
 
   return schema
 }
+
 
 export default fieldsToJsonSchema
