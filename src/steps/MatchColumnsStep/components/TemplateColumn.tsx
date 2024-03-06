@@ -78,6 +78,7 @@ export const TemplateColumn = <T extends string>({ column, onChange, onSubChange
   const addMissingFieldsFromHeader = () => {
     if (!isSchemaUsed) {
       const fields = getFields() || []
+      console.log("fields - searching for validation", fields)
 
       // Helper function to add a field only if it doesn't exist
       const addFieldIfMissing = (key: string, label: string, description: string) => {
@@ -98,9 +99,6 @@ export const TemplateColumn = <T extends string>({ column, onChange, onSubChange
       const header = column.header
       const headerCapitalized = header.charAt(0).toUpperCase() + header.slice(1).toLowerCase().replace(/_/g, " ")
       addFieldIfMissing(header, headerCapitalized, "This field element is automatically generated")
-
-      // Ensure an "id" field exists
-      addFieldIfMissing("id", "ID", "This id field is automatically generated")
     }
   }
 
