@@ -18,7 +18,7 @@ jobs:
     - name: Log in to GitLab Container Registry
       uses: docker/login-action@v1
       with:
-        registry: registry.hzdr.de
+        registry: registry.hzdr.de/l.kulla
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.TOKEN }}
 
@@ -33,5 +33,5 @@ jobs:
         push: true
         tags: |
           kaapana-build-bvm/kaapana-persistence-importer:0.0.0-latest
-          l.kulla/kaapana-build-bvm/kaapana-persistence-importer:${{ env.COMMIT_SHA }}
+          kaapana-build-bvm/kaapana-persistence-importer:${{ env.COMMIT_SHA }}
 
