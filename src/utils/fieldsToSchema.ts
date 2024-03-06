@@ -18,24 +18,18 @@ function incrementVersion(version: string): string {
   return parts.join(".")
 }
 
-function fieldsToJsonSchema(fields: Field<string>[], schemaUsed?: string): JSONSchema {
+function fieldsToJsonSchema(fields: Field<string>[], schemaVersion: string, schemaUsed?: string): JSONSchema {
   console.log("schemaUsed", schemaUsed)
 
-  let nextVersion: string = "0.0.1" //default
-  let id: string = "urn:kaapana:newschema" //default
+  let version: string = schemaVersion
+  let id: string = "urn:default:default" //default
 
 
   if (schemaUsed) {
-    const versionRegex = /(\d+\.\d+\.\d+)/
-    const match = schemaUsed.match(versionRegex)
-
-    if (match) {
-      nextVersion = incrementVersion(match[1])
-      id = schemaUsed.substring(0, schemaUsed.lastIndexOf(":")) // Extract ID
-    } else {
-      id = schemaUsed // No version in schemaUsed, use as ID
-    }
+    version = incrementVersion(schemaVersion)
+    id = schemaUsed
   }
+
 
   const schema: JSONSchema = {
     $defs: {},
@@ -45,7 +39,7 @@ function fieldsToJsonSchema(fields: Field<string>[], schemaUsed?: string): JSONS
     additionalProperties: true,
     metamodel_version: "1.7.0",
     required: [],
-    version: nextVersion,
+    version: version,
   }
 
 

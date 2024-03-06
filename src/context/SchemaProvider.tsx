@@ -12,6 +12,8 @@ interface SchemaContextType {
   setSelectedSchema: (schema: JSONSchema7) => void;
   convertedSchema: Fields<string> | undefined; //converted schema based on the selected schema
   setConvertedSchema: (fields: Fields<string> | undefined) => void;
+  schemaVersion: string; //version of the schema
+  setSchemaVersion: (version: string) => void;
 }
 
 const SchemaContext = createContext<SchemaContextType | undefined>(undefined)
@@ -21,6 +23,7 @@ export const SchemaProvider = ({ children }: { children: ReactNode }) => {
   const [schemaToUse, setSchemaToUse] = useState<string | undefined>(undefined)
   const [selectedSchema, setSelectedSchema] = useState<JSONSchema7>({})
   const [convertedSchema, setConvertedSchema] = useState<Fields<string> | undefined>(undefined)
+  const [schemaVersion, setSchemaVersion] = useState<string>("0.0.0")
 
   const value = {
     isSchemaUsed,
@@ -31,6 +34,8 @@ export const SchemaProvider = ({ children }: { children: ReactNode }) => {
     setSelectedSchema,
     convertedSchema,
     setConvertedSchema,
+    schemaVersion,
+    setSchemaVersion,
   }
 
   return <SchemaContext.Provider value={value}>{children}</SchemaContext.Provider>

@@ -64,12 +64,10 @@ export const useApi = () => {
   }, [toast, errorToast])
 
 
-  const uploadNewSchemaToAPI = useCallback((schemaToUse: string | undefined, fields: Fields<string>) => async () => {
+  const uploadNewSchemaToAPI = useCallback((schemaToUse: string | undefined, fields: Fields<string>, schemaVersion: string) => async () => {
     try {
-      const conversion = fieldsToJsonSchema(fields, schemaToUse)
-      conversion["$id"] = schemaToUse
+      const conversion = fieldsToJsonSchema(fields, schemaVersion, schemaToUse)
 
-      conversion["version"] = conversion["version"] || "0.0.1"
 
       await apiClient.post("/schema", conversion)
       toast({

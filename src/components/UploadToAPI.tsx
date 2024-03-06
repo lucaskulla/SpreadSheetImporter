@@ -22,6 +22,7 @@ import { mockRsiValues } from "../stories/mockRsiValues"
 import { translations } from "../translationsRSIProps"
 import { useSchemaContext } from "../context/SchemaProvider"
 
+
 interface UploadModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -35,11 +36,11 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onUploadData
   const [uploadOngoing, setUploadOngoing] = useState(false)
   const { schemaToUse, setSchemaToUse } = useSchemaContext()
 
-
   const isSchemaNameValid = useCallback((name: string) => {
-    const regex = /^urn:[a-zA-Z0-9]+:[a-zA-Z0-9]/
+    const regex = /^urn:[a-zA-Z0-9]+:[a-zA-Z0-9]+(?<!\d+\.\d+\.\d+)$/
     return !!name && regex.test(name)
   }, [])
+
 
   const handleSubmit = async () => {
     setUploadOngoing(true) // Start loading indication

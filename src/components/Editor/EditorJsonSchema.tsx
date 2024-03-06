@@ -32,13 +32,13 @@ const EditorModalJSONSchema = ({ isOpen, onClose }: EditorModalProps) => {
   const [editorValue, setEditorValue] = useState("No schema available")
   const [theme, setTheme] = useState<string>(THEMES.light)
 
-  const { schemaToUse, setSelectedSchema } = useSchemaContext()
+  const { schemaToUse, setSelectedSchema, schemaVersion } = useSchemaContext()
   const { getFields } = useFieldContext()
 
   useEffect(() => {
     const fields = getFields()
     if (fields) {
-      const conversion = fieldsToJsonSchema(fields, schemaToUse)
+      const conversion = fieldsToJsonSchema(fields, schemaVersion, schemaToUse)
       setEditorValue(JSON.stringify(conversion, null, 4))
     }
   }, [getFields, schemaToUse])

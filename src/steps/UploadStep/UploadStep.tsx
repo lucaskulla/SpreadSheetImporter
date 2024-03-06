@@ -35,6 +35,35 @@ interface SchemaOption {
   label: string;
 }
 
+
+function getHighestVersionAndSchema(response: RJSFSchema): { version: string, schema: RJSFSchema } {
+  // Extract version keys from the response object
+  const versions = Object.keys(response)
+
+  // Sort the version keys. The sort function compares each part of the version numbers.
+  versions.sort((a, b) => {
+    const partsA = a.split(".").map(Number)
+    const partsB = b.split(".").map(Number)
+
+    // Compare each part of the version number until a difference is found
+    for (let i = 0; i < Math.min(partsA.length, partsB.length); i++) {
+      if (partsA[i] !== partsB[i]) {
+        return partsA[i] - partsB[i]
+      }
+    }
+
+    // If all compared parts are equal, the longer version string is considered higher
+    return partsA.length - partsB.length
+  })
+
+  // The last element in the sorted array is the highest version
+  const highestVersion = versions[versions.length - 1]
+
+  // Return the highest version object from the response
+  return { version: response[highestVersion]["version"], schema: response[highestVersion] }
+}
+
+
 export const UploadStep = ({ onContinue }: UploadProps) => {
   const [isLoading, setIsLoading] = useState(false)
   const styles = useStyleConfig("UploadStep") as typeof themeOverrides["components"]["UploadStep"]["baseStyle"]
@@ -48,6 +77,7 @@ export const UploadStep = ({ onContinue }: UploadProps) => {
     selectedSchema,
     setSelectedSchema,
     convertedSchema,
+    setSchemaVersion,
     setConvertedSchema,
   } = useSchemaContext()
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
@@ -70,19 +100,18 @@ export const UploadStep = ({ onContinue }: UploadProps) => {
     if (!schemaToUse) { // If no schema is selected, reset the selected schema
       setSchemaToUse(undefined)
       setSelectedSchema({})
+      setSchemaVersion("0.0.1")
     } else {
       try {
         const response: AxiosResponse<RJSFSchema> = await apiClient.get(`/schema/${schemaToUse}`)
-        const version = schemaToUse.substring(schemaToUse.lastIndexOf(":") + 1) // "0.0.1"
 
-        if (response.data[version]) {
-          setSelectedSchema(response.data[version])
-          setConvertedSchema(schemaToFields(response.data[version]))
-        } else {
-          console.log("No version in schema found")
-          showErrorAlert("No version in schema found")
-        }
-      } catch (error) {
+        const { version, schema } = getHighestVersionAndSchema(response.data)
+
+        setSchemaVersion(version)
+        setSelectedSchema(schema)
+        setConvertedSchema(schemaToFields(schema))
+      } catch
+        (error) {
         console.log("Error fetching schema", error)
         toast({
           status: "error",
@@ -105,7 +134,7 @@ export const UploadStep = ({ onContinue }: UploadProps) => {
       return // Do not fetch options if the checkbox is unchecked
     }
     try {
-      const response = await apiClient.get("/schema/", { params: { include_version: true } })
+      const response = await apiClient.get("/schema/", { params: { include_version: false } })
       if (Array.isArray(response.data)) {
         setFetchedOptions(response.data.map((item) => ({ value: item, label: item })))
       } else {

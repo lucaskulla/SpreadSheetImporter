@@ -57,6 +57,7 @@ export const Basic = () => {
 
   const {
     schemaToUse,
+    schemaVersion,
   } = useSchemaContext() // Use the context to get schema-related states and setters
 
   const {
@@ -67,7 +68,7 @@ export const Basic = () => {
 
 
   const onUploadData = uploadDataToAPI(data, schemaToUse)
-  const onUploadSchema = uploadNewSchemaToAPI(schemaToUse, getFields())
+  const onUploadSchema = uploadNewSchemaToAPI(schemaToUse, getFields(), schemaVersion)
 
   const saveDataEditor = (dataEditor: string, changesInKeys: any) => {
     saveDataFromEditor(dataEditor, changesInKeys, setData, getFields(), setIsOpenJsonEditor, useToast)
