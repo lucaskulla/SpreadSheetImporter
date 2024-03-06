@@ -32,6 +32,6 @@ jobs:
         file: ./Dockerfile
         push: true
         tags: |
-          kaapana-build-bvm/kaapana-persistence-importer:0.0.0-latest
-          kaapana-build-bvm/kaapana-persistence-importer:${{ env.COMMIT_SHA }}
+          registry.hzdr.de/l.kullakaapana-build-bvm/kaapana-persistence-importer:0.0.0-latest
+          registry.hzdr.de/l.kullakaapana-build-bvm/kaapana-persistence-importer:${{ env.COMMIT_SHA }}
 
